@@ -20,6 +20,6 @@ setup(
 	entry_points=\
 	"""
     [ckan.plugins]
-    	contact=ckanext.doi.plugin:DOIPlugin
+    	doi=ckanext.doi.plugin:DOIPlugin
 	""",
 )
