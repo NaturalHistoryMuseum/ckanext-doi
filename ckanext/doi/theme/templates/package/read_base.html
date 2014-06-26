@@ -1,0 +1,21 @@
+{#
+Adds DOI and citation information
+#}
+
+{% ckan_extends %}
+
+{% block package_social %}
+    {% block doi %}
+      <section class="module module-narrow doi">
+        {% block social_title %}
+          <h2 class="module-heading"><i class="icon-medium icon-share"></i> {{ _('Cite this') }}</h2>
+        {% endblock %}
+        {% block citation %}
+            <p class="module-content">{{ pkg.doi }}</p>
+        {% endblock %}
+      </section>
+    {% endblock %}
+
+    {{ super() }}
+
+{% endblock %}
