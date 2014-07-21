@@ -6,9 +6,9 @@ Adds DOI and citation information
 
 {% block package_social %}
     {% block doi %}
-      <section class="module module-narrow doi">
+      <section class="module module-narrow module-shallow doi">
         {% block social_title %}
-          <h2 class="module-heading"><i class="icon-medium icon-share"></i> {{ _('Cite this') }}</h2>
+          <h2 class="module-heading"><i class="icon-medium icon-quote-right"></i> {{ _('Cite this dataset') }}</h2>
         {% endblock %}
         {% block citation %}
             <p class="module-content">{{ pkg.doi }}</p>
