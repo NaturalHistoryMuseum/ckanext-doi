@@ -5,12 +5,12 @@ Adds DOI and citation information
 {% ckan_extends %}
 
 {% block package_social %}
-    {% block doi %}
+    {% block citation %}
       <section class="module module-narrow module-shallow doi">
-        {% block social_title %}
+        {% block citation_title %}
           <h2 class="module-heading"><i class="icon-medium icon-quote-right"></i> {{ _('Cite this dataset') }}</h2>
         {% endblock %}
-        {% block citation %}
+        {% block doi %}
             <p class="module-content">{{ pkg.doi }}</p>
         {% endblock %}
       </section>
