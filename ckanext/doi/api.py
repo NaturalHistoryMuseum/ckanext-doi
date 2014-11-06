@@ -43,13 +43,11 @@ class DataCiteAPI(object):
         # Perform the request
         r = getattr(requests, method)(endpoint, **kwargs)
 
-        print r
-
         # Raise exception if we have an error
         r.raise_for_status()
 
-        # Return the test result
-        return r.content
+        # Return the result
+        return r
 
 
 class MetadataDataCiteAPI(DataCiteAPI):
@@ -88,7 +86,6 @@ class MetadataDataCiteAPI(DataCiteAPI):
 
         # Optional metadata properties
         subject = kwargs.get('subject')
-        contributor = kwargs.get('contributor')
         description = kwargs.get('description')
         size = kwargs.get('size')
         format = kwargs.get('format')
@@ -123,16 +120,12 @@ class MetadataDataCiteAPI(DataCiteAPI):
                 'subject': [c for c in _ensure_list(subject)]
             }
 
-        # Add contributors (if it exists)
-        if contributor:
-            metadata['resource']['contributors'] = {
-                'contributor': [{'contributorName': c} for c in _ensure_list(contributor)]
-            }
-
         if description:
-            metadata['resource']['descriptions']['description'] = {
-                '@descriptionType': 'Abstract',
-                '#text': description
+            metadata['resource']['descriptions'] = {
+                'description': {
+                    '@descriptionType': 'Abstract',
+                    '#text': description
+                }
             }
 
         if size:
@@ -149,7 +142,9 @@ class MetadataDataCiteAPI(DataCiteAPI):
             metadata['resource']['version'] = version
 
         if rights:
-            metadata['resource']['rights'] = rights
+            metadata['resource']['rightsList'] = {
+                'rights': rights
+            }
 
         if resource_type:
             metadata['resource']['resourceType'] = {
@@ -162,59 +157,18 @@ class MetadataDataCiteAPI(DataCiteAPI):
 
         return unparse(metadata, pretty=True, full_document=False)
 
-    def upsert(self, identifier, title, creator, publisher, publisher_year, **kwargs):
+    def upsert(self, *args, **kwargs):
         """
         URI: https://test.datacite.org/mds/metadata
         This request stores new version of metadata. The request body must contain valid XML.
         @param metadata_dict: dict to convert to xml
         @return: URL of the newly stored metadata
         """
-        xml = self.metadata_to_xml(identifier, title, creator, publisher, publisher_year, **kwargs)
+        xml = self.metadata_to_xml(*args, **kwargs)
+        r = self._call(method='post', data=xml, headers={'Content-Type': 'application/xml'})
+        assert r.status_code == 201, 'Operation failed ERROR CODE: %s' % r.status_code
+        return r
 
-        # print xml
-        #
-        # xml = """
-        #     <resource xmlns="http://datacite.org/schema/kernel-3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://datacite.org/schema/kernel-3 http://schema.datacite.org/meta/kernel-3/metadata.xsd">
-        #     <creators>
-        #     <creator>
-        #     <creatorName>Fosmire, Michael</creatorName>
-        #     </creator>
-        #     <creator>
-        #     <creatorName>Wertz, Ruth</creatorName>
-        #     </creator>
-        #     <creator>
-        #     <creatorName>Purzer, Senay</creatorName>
-        #     </creator>
-        #     </creators>
-        #     <titles>
-        #     <title>Critical Engineering Literacy Test (CELT)</title>
-        #     </titles>
-        #     <publisher>Purdue University Research Repository (PURR)</publisher>
-        #     <publicationYear>2013</publicationYear>
-        #     <subjects>
-        #     <subject>Assessment</subject>
-        #     <subject>Information Literacy</subject>
-        #     <subject>Engineering</subject>
-        #     <subject>Undergraduate Students</subject>
-        #     <subject>CELT</subject>
-        #     <subject>Purdue University</subject>
-        #     </subjects>
-        #     <language>eng</language>
-        #     <resourceType resourceTypeGeneral="Dataset">Dataset</resourceType>
-        #     <version>1</version>
-        #     <descriptions>
-        #     <description descriptionType="Abstract">
-        #     We developed an instrument, Critical Engineering Literacy Test (CELT), which is a multiple choice instrument designed to measure undergraduate students’ scientific and information literacy skills. It requires students to first read a technical memo and, based on the memo’s arguments, answer eight multiple choice and six open-ended response questions. We collected data from 143 first-year engineering students and conducted an item analysis. The KR-20 reliability of the instrument was .39. Item difficulties ranged between .17 to .83. The results indicate low reliability index but acceptable levels of item difficulties and item discrimination indices. Students were most challenged when answering items measuring scientific and mathematical literacy (i.e., identifying incorrect information).
-        #     </description>
-        #     </descriptions>
-        #     <identifier identifierType="DOI">10.5072/D3P26Q35R-Test3</identifier>
-        #     </resource>
-        #
-        # """
-
-        print xml
-
-        return self._call(method='post', data=xml, headers={'Content-Type': 'application/xml'})
 
     def delete(self, doi):
         """
@@ -263,8 +217,12 @@ class DOIDataCiteAPI(DataCiteAPI):
         @return:
         """
         return self._call(
-            params={'doi': doi, 'url': url},
-            method='post'
+            params={
+                'doi': doi,
+                'url': url
+            },
+            method='post',
+            headers={'Content-Type': 'text/plain;charset=UTF-8'}
         )
 
 class MediaDataCiteAPI(DataCiteAPI):
@@ -274,12 +232,31 @@ class MediaDataCiteAPI(DataCiteAPI):
     pass
 
 
+def mint_doi(identifier, url, title, creator, publisher, publisher_year, **kwargs):
+    """
+    Helper function for minting a new doi
+    Need to create metadata first
+    And then create DOI => URI association
+    See MetadataDataCiteAPI.metadata_to_xml for param information
+    @param identifier:
+    @param title:
+    @param creator:
+    @param publisher:
+    @param publisher_year:
+    @param kwargs:
+    @return: request response
+    """
 
-
+    metadata = MetadataDataCiteAPI()
+    metadata.upsert(identifier, title, creator, publisher, publisher_year, **kwargs)
+    doi = DOIDataCiteAPI()
+    r = doi.upsert(doi=identifier, url=url)
+    assert r.status_code == 201, 'Operation failed ERROR CODE: %s' % r.status_code
+    return r
 
 if __name__ == "__main__":
 
-    api = MetadataDataCiteAPI()
-    print api.upsert('10.5072/EXAMPLE/EG5', 'Example title', ['Ben Scott', 'Lovermore'], 'Natural History Museum', 2014, contributor=['one', 'two'], subject=['one', 'two'])
+    identifier = '10.5072/EXAMPLE/EG9.5'
+    x = mint_doi(identifier, 'http://data.nhm.ac.uk/eg5', 'Example title', ['Ben Scott', 'Lovermore'], 'Natural History Museum', 2014, subject=['one', 'two'], description='Lorem ipsum', rights='CC BY')
+    print x
 
-    # print doi
