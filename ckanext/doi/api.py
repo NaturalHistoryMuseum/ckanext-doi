@@ -13,8 +13,6 @@ from xmltodict import unparse
 
 ENDPOINT = 'https://test.datacite.org/mds'
 TEST_ENDPOINT = 'https://test.datacite.org/mds'
-TEST_PREFIX = '10.5072'
-
 
 class DataCiteAPI(object):
 
@@ -24,21 +22,28 @@ class DataCiteAPI(object):
 
     def _call(self, **kwargs):
 
+        test_mode = config.get("ckanext.doi.test_mode")
+        test_mode = True
+        account_name = config.get("ckanext.doi.account_name")
+        account_password = config.get("ckanext.doi.account_password")
+
+        # If we're in test mode, use test endpoint
+        endpoint = os.path.join(TEST_ENDPOINT if test_mode else ENDPOINT, self.path)
+
+        try:
+            path_extra = kwargs.pop('path_extra')
+        except KeyError:
+            pass
+        else:
+            endpoint = os.path.join(endpoint, path_extra)
+
         try:
             method = kwargs.pop('method')
         except KeyError:
             method = 'get'
 
-        test_mode = config.get("ckanext.doi.test_mode")
-        test_mode = True
-        account_name = 'BL.NHM'
-        account_password = '842877dm'
-
-        # If we're in test mode, use test endpoint
-        endpoint = os.path.join(TEST_ENDPOINT if test_mode else ENDPOINT, self.path)
-
         # Add authorisation to request
-        kwargs['auth'] =  (account_name, account_password)
+        kwargs['auth'] = (account_name, account_password)
 
         # Perform the request
         r = getattr(requests, method)(endpoint, **kwargs)
@@ -62,8 +67,7 @@ class MetadataDataCiteAPI(DataCiteAPI):
         @param doi:
         @return: The most recent version of metadata associated with a given DOI.
         """
-        self.path = os.path.join(self.path, doi)
-        return self._call()
+        return self._call(path_extra=doi)
 
     @staticmethod
     def metadata_to_xml(identifier, title, creator, publisher, publisher_year, **kwargs):
@@ -148,7 +152,7 @@ class MetadataDataCiteAPI(DataCiteAPI):
 
         if resource_type:
             metadata['resource']['resourceType'] = {
-                '@resourceTypeGeneral': resource_type,
+                '@resourceTypeGeneral': 'Dataset',
                 '#text': resource_type
             }
 
@@ -165,10 +169,11 @@ class MetadataDataCiteAPI(DataCiteAPI):
         @return: URL of the newly stored metadata
         """
         xml = self.metadata_to_xml(*args, **kwargs)
+
+        print xml
         r = self._call(method='post', data=xml, headers={'Content-Type': 'application/xml'})
         assert r.status_code == 201, 'Operation failed ERROR CODE: %s' % r.status_code
         return r
-
 
     def delete(self, doi):
         """
@@ -177,8 +182,7 @@ class MetadataDataCiteAPI(DataCiteAPI):
         @param doi: DOI
         @return: Response code
         """
-        self.path = os.path.join(self.path, doi)
-        return self._call(method='delete')
+        return self._call(path_extra=doi, method='delete')
 
 
 class DOIDataCiteAPI(DataCiteAPI):
@@ -195,8 +199,7 @@ class DOIDataCiteAPI(DataCiteAPI):
         @param doi: DOI
         @return: This request returns an URL associated with a given DOI.
         """
-        self.path = os.path.join(self.path, doi)
-        return self._call(doi)
+        return self._call(path_extra=doi).text
 
     def list(self):
         """
@@ -230,33 +233,4 @@ class MediaDataCiteAPI(DataCiteAPI):
     Calls to DataCite Metadata API
     """
     pass
-
-
-def mint_doi(identifier, url, title, creator, publisher, publisher_year, **kwargs):
-    """
-    Helper function for minting a new doi
-    Need to create metadata first
-    And then create DOI => URI association
-    See MetadataDataCiteAPI.metadata_to_xml for param information
-    @param identifier:
-    @param title:
-    @param creator:
-    @param publisher:
-    @param publisher_year:
-    @param kwargs:
-    @return: request response
-    """
-
-    metadata = MetadataDataCiteAPI()
-    metadata.upsert(identifier, title, creator, publisher, publisher_year, **kwargs)
-    doi = DOIDataCiteAPI()
-    r = doi.upsert(doi=identifier, url=url)
-    assert r.status_code == 201, 'Operation failed ERROR CODE: %s' % r.status_code
-    return r
-
-if __name__ == "__main__":
-
-    identifier = '10.5072/EXAMPLE/EG9.5'
-    x = mint_doi(identifier, 'http://data.nhm.ac.uk/eg5', 'Example title', ['Ben Scott', 'Lovermore'], 'Natural History Museum', 2014, subject=['one', 'two'], description='Lorem ipsum', rights='CC BY')
-    print x
 
