@@ -10,7 +10,7 @@ from itertools import groupby
 from ckanext.doi.lib import mint_doi, get_unique_identifier, get_metadata_created_datetime
 from ckanext.doi.api import MetadataDataCiteAPI, DOIDataCiteAPI
 import ckanext.doi.logic.schema as doi_schema
-from ckanext.doi.helpers import mandatory_field_is_editable
+from ckanext.doi.helpers import mandatory_field_is_editable, package_get_year
 import ckan.logic as logic
 import ckan.lib.helpers as h
 from ckan.common import c, _
@@ -29,7 +29,6 @@ class DOIPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
     """
     CKAN DOI Extension
     """
-
     p.implements(p.IConfigurer)
     p.implements(p.IDatasetForm, inherit=True)
     p.implements(p.IPackageController, inherit=True)
@@ -93,6 +92,7 @@ class DOIPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
     def get_helpers(self):
         return {
             'mandatory_field_is_editable': mandatory_field_is_editable,
+            'package_get_year': package_get_year,
             'now': datetime.datetime.now
         }
 
@@ -114,7 +114,7 @@ class DOIPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
 
     def update_doi(self, pkg_dict):
 
-        year_published = get_metadata_created_datetime(pkg_dict).year
+        year_published = package_get_year(pkg_dict)
         optional_metadata = self._get_optional_metadata(pkg_dict)
         identifier = pkg_dict['doi']
 
@@ -169,7 +169,7 @@ class DOIPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
 
         url = os.path.join(site_url, 'dataset', pkg_dict['id'])
 
-        year_published = get_metadata_created_datetime(pkg_dict).year
+        year_published = package_get_year(pkg_dict)
 
         optional_metadata = self._get_optional_metadata(pkg_dict)
 
