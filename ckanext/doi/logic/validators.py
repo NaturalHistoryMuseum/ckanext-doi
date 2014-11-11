@@ -6,26 +6,27 @@ Copyright (c) 2013 'bens3'. All rights reserved.
 """
 
 import re
+
 import ckan.plugins as p
 from ckan.common import _
+import ckan.logic as logic
+import ckan.lib.navl.dictization_functions as df
+from ckanext.doi.helpers import mandatory_field_is_editable
 
-Invalid = p.toolkit.Invalid
+missing = df.missing
+StopOnError = df.StopOnError
+Invalid = df.Invalid
 
-def string_max_length(max_length):
-    '''
-    Checks if a string is longer than a certain length
+get_action = logic.get_action
 
-    :raises: ckan.lib.navl.dictization_functions.Invalid if the string is
-        longer than max length
-    '''
-    def callable(value, context):
 
-        if len(value) > max_length:
-            raise Invalid(
-                _('Length must be less than {0} characters')
-                .format(max_length)
-            )
+def editable_mandatory_field(key, data, errors, context):
 
-        return value
+    pkg_dict = get_action('package_show')(context, {'id': context['package'].id})
+    value = data.get(key)
+    field = key[0]
 
-    return callable
+    # Raise an error if the field value has been updated and this field is no longer editable
+    if value != pkg_dict[field] and not mandatory_field_is_editable(pkg_dict):
+        errors[key].append(_('Core DOI metadata fields are no longer editable.'))
+        raise StopOnError

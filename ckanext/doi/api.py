@@ -10,9 +10,7 @@ import abc
 import requests
 from pylons import config
 from xmltodict import unparse
-
-ENDPOINT = 'https://test.datacite.org/mds'
-TEST_ENDPOINT = 'https://test.datacite.org/mds'
+from ckanext.doi.config import get_endpoint
 
 class DataCiteAPI(object):
 
@@ -22,13 +20,9 @@ class DataCiteAPI(object):
 
     def _call(self, **kwargs):
 
-        test_mode = config.get("ckanext.doi.test_mode")
-        test_mode = True
         account_name = config.get("ckanext.doi.account_name")
         account_password = config.get("ckanext.doi.account_password")
-
-        # If we're in test mode, use test endpoint
-        endpoint = os.path.join(TEST_ENDPOINT if test_mode else ENDPOINT, self.path)
+        endpoint = os.path.join(get_endpoint(), self.path)
 
         try:
             path_extra = kwargs.pop('path_extra')
@@ -169,8 +163,6 @@ class MetadataDataCiteAPI(DataCiteAPI):
         @return: URL of the newly stored metadata
         """
         xml = self.metadata_to_xml(*args, **kwargs)
-
-        print xml
         r = self._call(method='post', data=xml, headers={'Content-Type': 'application/xml'})
         assert r.status_code == 201, 'Operation failed ERROR CODE: %s' % r.status_code
         return r

@@ -6,30 +6,26 @@ Created by 'bens3' on 2013-06-21.
 Copyright (c) 2013 'bens3'. All rights reserved.
 """
 
-import datetime
-import dateutil.parser as parser
+from ckanext.doi.lib import get_metadata_created_datetime
+from datetime import datetime, timedelta
 
-def package_get_doi(pkg_dict):
-    """
-    Retrieve the DOI from the package extras dict
-    @param pkg_dict:
-    @return:
-    """
-     # Try and extract the DOI from the extras values
-    if 'extras' in pkg_dict:
-        for extra in pkg_dict['extras']:
-            if extra['key'] == u'doi':
-                return extra['value']
+# The number of days a mandatory field is editable for
+DAYS_EDITABLE = 1
 
-    return None
-
-def package_get_year(pkg_dict):
+def mandatory_field_is_editable(pkg_dict):
     """
-    Helper function to retrieve year from created date
-    @param pkg_dict:
-    @return:
+    Are mandatory fields still editable?
+    Mandatory DOI fields should not be editable
+    DataCite recommend locking fields down after a couple of days
+    This checks time past against metadata creation date
+    @return: Boolean. True if fields are still editable
     """
-    return parser.parse(pkg_dict['metadata_created']).year
 
-def now():
-    return datetime.datetime.now()
+    try:
+        if pkg_dict['doi']:
+            return get_metadata_created_datetime(pkg_dict) > (datetime.now() - timedelta(minutes=DAYS_EDITABLE))
+    except KeyError:
+        # If metadata_created doesn't exist, this is a new dataset
+        pass
+
+    return True

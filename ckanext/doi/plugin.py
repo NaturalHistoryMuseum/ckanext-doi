@@ -2,28 +2,36 @@
 CKAN Contact Extension
 """
 import os
+import datetime
 from logging import getLogger
 import ckan.plugins as p
 from ckan.lib.base import config
-from ckanext.doi.lib import get_prefix, upsert_doi
-from ckanext.doi.api import DOIDataCiteAPI
-from requests.exceptions import HTTPError
-from ckanext.doi.helpers import package_get_doi, package_get_year, now
-import random
+from itertools import groupby
+from ckanext.doi.lib import mint_doi, get_unique_identifier, get_metadata_created_datetime
+from ckanext.doi.api import MetadataDataCiteAPI, DOIDataCiteAPI
+import ckanext.doi.logic.schema as doi_schema
+from ckanext.doi.helpers import mandatory_field_is_editable
 import ckan.logic as logic
-from ckan.common import c
+import ckan.lib.helpers as h
+from ckan.common import c, _
 import ckan.model as model
+from ckan.logic.schema import (
+    default_create_package_schema,
+    default_update_package_schema,
+    default_show_package_schema
+    )
 
 get_action = logic.get_action
 
 log = getLogger(__name__)
 
-class DOIPlugin(p.SingletonPlugin):
+class DOIPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
     """
     CKAN DOI Extension
     """
 
     p.implements(p.IConfigurer)
+    p.implements(p.IDatasetForm, inherit=True)
     p.implements(p.IPackageController, inherit=True)
     p.implements(p.ITemplateHelpers, inherit=True)
 
@@ -33,6 +41,7 @@ class DOIPlugin(p.SingletonPlugin):
 
     ## IPackageController
     def edit(self, entity):
+
         """
         Implements IPackageController.edit
         Alter the package entity prior to saving it to the DB
@@ -41,89 +50,128 @@ class DOIPlugin(p.SingletonPlugin):
         @return: None
         """
 
-        # We do not want to assign a DOI if this is a draft or private
-        if not entity.state.startswith('draft'):
+        if not (entity.state.startswith('draft') or entity.private):
 
-            # Load the package
-            context = {'model': model, 'session': model.Session, 'api_version': 3, 'for_edit': True, 'user': c.user or c.author, 'auth_user_obj': c.userobj}
-            pkg_dict = get_action('package_show')(context, {'id': entity.name})
+            try:
+                doi = entity.extras['doi']
+            except KeyError:
+                doi = None
 
-            doi = package_get_doi(pkg_dict)
-
+            # If we don't have a DOI, create one
             if not doi:
-                # If we do not have a DOI, create one
-                log.warning('No DOI: Minting DOI for dataset %s', entity.title)
-                entity.extras['doi'] = self._mint_doi(pkg_dict)
-            else:
-                # If we do have a DOI, assign to extras so it persists
-                entity.extras['doi'] = doi
+
+                # FIXME: If an entity is being updated from private to public, and tags changed at the same time, this will not update the tags
+                pkg_dict = entity.as_dict()
+                # Create DOI and assign to extras
+                entity.extras['doi'] = self.create_doi(pkg_dict)
+                h.flash_success(_('DOI %s has been created.' % entity.extras['doi']))
+
+    def after_update(self, context, pkg_dict):
+        """
+        After a dataset is updated
+        @param context:
+        @param pkg_dict:
+        @return:
+        """
+
+        # State is only set on newly created dataset
+        try:
+            pkg_dict['state']
+            is_new = True
+        except KeyError:
+            is_new = False
+
+        # If we're editing a dataset, update the metadata
+        # This is called after creating a dataset, so make sure dataset isn't new
+        if not is_new and pkg_dict['doi']:
+            # Package dict at this point is missing date created - add them back in
+            pkg_dict['metadata_created'] = context['package'].metadata_created
+            pkg_dict['resources'] = [r.as_dict() for r in context['package'].resources]
+            self.update_doi(pkg_dict)
 
     # ITemplateHelpers
     def get_helpers(self):
         return {
-            'package_get_doi': package_get_doi,
-            'package_get_year': package_get_year,
-            'now': now
+            'mandatory_field_is_editable': mandatory_field_is_editable,
+            'now': datetime.datetime.now
         }
 
-    def _mint_doi(self, pkg_dict):
+    ## IDatasetForm
+    def package_types(self):
+        return []
+
+    def is_fallback(self):
+        return True
+
+    def create_package_schema(self):
+        return doi_schema.create_package_schema()
+
+    def update_package_schema(self):
+        return doi_schema.update_package_schema()
+
+    def show_package_schema(self):
+        return doi_schema.show_package_schema()
+
+    def update_doi(self, pkg_dict):
+
+        year_published = get_metadata_created_datetime(pkg_dict).year
+        optional_metadata = self._get_optional_metadata(pkg_dict)
+        identifier = pkg_dict['doi']
+
+        metadata_api = MetadataDataCiteAPI()
+        metadata_api.upsert(identifier, pkg_dict['title'], pkg_dict['author'], config.get("ckanext.doi.publisher"), year_published, **optional_metadata)
+
+    @staticmethod
+    def _get_optional_metadata(pkg_dict):
+
+        optional_metadata = {
+            # Derive format from the attached resources
+            'format': ', '.join([res['format'] for res in pkg_dict['resources'] if res['format']]),
+            'description': pkg_dict['notes']
+        }
+
+        if 'tags' in pkg_dict:
+            optional_metadata['subject'] = list(set([tag['name'] if isinstance(tag, dict) else tag for tag in pkg_dict['tags']]))
+
+        if pkg_dict['license_id'] != 'notspecified':
+
+            licenses = model.Package.get_license_options()
+
+            for license_title, license_id in licenses:
+                if license_id == pkg_dict['license_id']:
+                    optional_metadata['rights'] = license_title
+                    break
+
+        if 'dataset_type' in pkg_dict:
+            optional_metadata['resource_type'] = pkg_dict['dataset_type'][0]
+
+        if 'version' in pkg_dict:
+            optional_metadata['version'] = pkg_dict['version']
+
+        return optional_metadata
+
+    def create_doi(self, pkg_dict):
         """
         Mint a new DOI for a dataset package
         @param pkg_dict:
         @return: identifier on success. None on failure
         """
 
-       # If private we do not want to create a DOI
-        if not pkg_dict['private']:
+        # Dataset name is used in the path, so is unique
+        # We can use this at point of creation as it's more descriptive than ID
+        identifier = get_unique_identifier()
 
-            # Dataset name is used in the path, so is unique
-            # We can use this at point of creation as it's more descriptive than ID
-            identifier = self.get_unique_identifier()
+        # The ID of a dataset never changes, so use that for the URL
+        site_url = config.get('ckan.site_url', '').rstrip('/')
 
-            # The ID of a dataset never changes, so use that for the URL
-            site_url = config.get('ckan.site_url', '').rstrip('/')
+        # TEMP: Override development
+        site_url = 'http://data.nhm.ac.uk'
 
-            # TEMP: Override development
-            site_url = 'http://data.nhm.ac.uk'
+        url = os.path.join(site_url, 'dataset', pkg_dict['id'])
 
-            url = os.path.join(site_url, 'dataset', pkg_dict['id'])
-            year_published = package_get_year(pkg_dict)
+        year_published = get_metadata_created_datetime(pkg_dict).year
 
-            optional_metadata = {
-                # Derive format from the attached resources
-                'format': ', '.join([res['format'] for res in pkg_dict['resources'] if res['format']]),
-                'description': pkg_dict['notes']
-            }
+        optional_metadata = self._get_optional_metadata(pkg_dict)
 
-            if 'tags' in pkg_dict:
-                optional_metadata['subject'] = [tag['display_name'] for tag in pkg_dict['tags']]
-
-
-            if pkg_dict['license_id'] != 'notspecified':
-                optional_metadata['rights'] = pkg_dict['license_title']
-
-            if pkg_dict['dataset_type']:
-                optional_metadata['resource_type'] = pkg_dict['dataset_type'][0]
-
-            if upsert_doi(identifier, url, pkg_dict['title'], pkg_dict['author'], config.get("ckanext.doi.publisher"), year_published, **optional_metadata):
-                return identifier
-
-    @staticmethod
-    def get_unique_identifier():
-        """
-        Loop generating a unique identifier
-        Checks if it already exists - if it doesn't we can use it
-        If it does already exist, generate another one
-        We check against the datacite repository, rather than our own internal database
-        As multiple services can be minting DOIs
-        @return:
-        """
-
-        api = DOIDataCiteAPI()
-
-        while True:
-            identifier = os.path.join(get_prefix(), '{0:07}'.format(random.randint(1, 100000)))
-            try:
-                api.get(identifier)
-            except HTTPError:
-                return identifier
+        if mint_doi(identifier, url, pkg_dict['title'], pkg_dict['author'], config.get("ckanext.doi.publisher"), year_published, **optional_metadata):
+            return identifier

@@ -1,0 +1,29 @@
+{% ckan_extends %}
+
+{% block package_basic_fields_title %}
+
+    {% block package_basic_fields_doi_title %}
+
+        {% if h.mandatory_field_is_editable(data) %}
+
+            {% set attrs = {'data-module': 'slug-preview-target'} %}
+
+        {% else %}
+
+            {% set attrs = {'data-module': 'slug-preview-target', 'readonly': 'readonly'} %}
+
+            <span class="info-block info-block-small">
+                <i class="icon-info-sign"></i>
+                <em>Dataset title</em> is a core DOI metadata field, and can no longer be changed.
+            </span>
+
+        {% endif %}
+
+        {{ form.input('title', id='field-title', label=_('Title'), placeholder=_('eg. A descriptive title'), value=data.title, error=errors.title, classes=['control-full', 'control-large'], attrs=attrs, is_required=true) }}
+
+      {# DOI field #}
+      {{ form.hidden('doi', value=data.doi) }}
+
+  {% endblock %}
+
+{% endblock %}
