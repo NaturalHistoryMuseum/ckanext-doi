@@ -12,7 +12,7 @@ Adds DOI and citation information
             <section class="module module-narrow module-shallow doi placeholder">
                     <h2 class="module-heading"><i class="icon-medium icon-quote-right"></i> {{ _('Cite this dataset') }}</h2>
                     <p class="module-content">
-                        {{ c.pkg_dict['author'] }} ({{ h.package_get_year(c.pkg_dict) }}): {{ c.pkg_dict['title'] }}<br />
+                        {{ c.pkg_dict['author'] }} ({{ h.package_get_year(c.pkg_dict) }}): {{ c.pkg_dict['title'] }} {{ c.pkg_dict['publisher'] }}.<br />
                         <a href="http://dx.doi.org/{{ c.pkg_dict['doi'] }}" target="_blank">http://dx.doi.org/{{ c.pkg_dict['doi'] }}</a><br />
                         <small>Retrieved: {{ h.render_datetime(h.now(), date_format='%H:%M %d %b %Y') }} (GMT)</small>
                     </p>

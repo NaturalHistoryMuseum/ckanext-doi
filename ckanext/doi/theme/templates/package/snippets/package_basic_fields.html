@@ -4,7 +4,7 @@
 
     {% block package_basic_fields_doi_title %}
 
-        {% if h.mandatory_field_is_editable(data) %}
+        {% if h.mandatory_field_is_editable(package_id=data.id) %}
 
             {% set attrs = {'data-module': 'slug-preview-target'} %}
 
@@ -20,9 +20,6 @@
         {% endif %}
 
         {{ form.input('title', id='field-title', label=_('Title'), placeholder=_('eg. A descriptive title'), value=data.title, error=errors.title, classes=['control-full', 'control-large'], attrs=attrs, is_required=true) }}
-
-      {# DOI field #}
-      {{ form.hidden('doi', value=data.doi) }}
 
   {% endblock %}
 

@@ -1,0 +1,20 @@
+{% ckan_extends %}
+
+{% block package_resources %}
+
+    {% if pkg.state == 'deleted' %}
+        <p class="empty"><i class="icon-warning-sign"></i> This dataset has been deleted.</p>
+    {% else %}
+        {% snippet "package/snippets/resources_list.html", pkg=pkg, resources=pkg.resources %}
+    {% endif %}
+
+{% endblock %}
+
+{% block package_tags %}
+
+    {% if pkg.state != 'deleted' %}
+        {% snippet "package/snippets/tags.html", tags=pkg.tags %}
+    {% endif %}
+
+{% endblock %}
+

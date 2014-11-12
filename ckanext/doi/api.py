@@ -89,6 +89,8 @@ class MetadataDataCiteAPI(DataCiteAPI):
         format = kwargs.get('format')
         version = kwargs.get('version')
         rights = kwargs.get('rights')
+        geo_point = kwargs.get('geo_point')
+        geo_box = kwargs.get('geo_box')
 
         # Optional metadata properties, with defaults
         resource_type = kwargs.get('resource_type', 'Dataset')
@@ -153,16 +155,30 @@ class MetadataDataCiteAPI(DataCiteAPI):
         if language:
             metadata['resource']['language'] = language
 
+        if geo_point:
+            metadata['resource']['geoLocations'] = {
+                'geoLocation': {
+                    'geoLocationPoint': geo_point
+                }
+            }
+
+        if geo_box:
+            metadata['resource']['geoLocations'] = {
+                'geoLocation': {
+                    'geoLocationBox': geo_box
+                }
+            }
+
         return unparse(metadata, pretty=True, full_document=False)
 
-    def upsert(self, *args, **kwargs):
+    def upsert(self, identifier, title, creator, publisher, publisher_year, **kwargs):
         """
         URI: https://test.datacite.org/mds/metadata
         This request stores new version of metadata. The request body must contain valid XML.
         @param metadata_dict: dict to convert to xml
         @return: URL of the newly stored metadata
         """
-        xml = self.metadata_to_xml(*args, **kwargs)
+        xml = self.metadata_to_xml(identifier, title, creator, publisher, publisher_year, **kwargs)
         r = self._call(method='post', data=xml, headers={'Content-Type': 'application/xml'})
         assert r.status_code == 201, 'Operation failed ERROR CODE: %s' % r.status_code
         return r

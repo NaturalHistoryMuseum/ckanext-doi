@@ -7,34 +7,15 @@ Copyright (c) 2013 'bens3'. All rights reserved.
 
 import os
 import random
-import dateutil.parser as parser
-from datetime import datetime
+from logging import getLogger
+from pylons import config
+from ckan.model import Session
 from requests.exceptions import HTTPError
 from ckanext.doi.config import get_prefix
 from ckanext.doi.api import MetadataDataCiteAPI, DOIDataCiteAPI
+from ckanext.doi.model import DOI
 
-
-def mint_doi(identifier, url, title, creator, publisher, publisher_year, **kwargs):
-    """
-    Helper function for minting a new doi
-    Need to create metadata first
-    And then create DOI => URI association
-    See MetadataDataCiteAPI.metadata_to_xml for param information
-    @param identifier:
-    @param title:
-    @param creator:
-    @param publisher:
-    @param publisher_year:
-    @param kwargs:
-    @return: request response
-    """
-
-    metadata = MetadataDataCiteAPI()
-    metadata.upsert(identifier, title, creator, publisher, publisher_year, **kwargs)
-    doi = DOIDataCiteAPI()
-    r = doi.upsert(doi=identifier, url=url)
-    assert r.status_code == 201, 'Operation failed ERROR CODE: %s' % r.status_code
-    return r.text == 'OK'
+log = getLogger(__name__)
 
 
 def get_unique_identifier():
@@ -57,14 +38,55 @@ def get_unique_identifier():
             return identifier
 
 
-def get_metadata_created_datetime(pkg_dict):
+def create_doi(package_id, **kwargs):
 
     """
-    Get metadata created value, parsed into datetime if it's not already
-    @param pkg_dict:
-    @return:
+    Helper function for minting a new doi
+    Need to create metadata first
+    And then create DOI => URI association
+    See MetadataDataCiteAPI.metadata_to_xml for param information
+    @param package_id:
+    @param title:
+    @param creator:
+    @param publisher:
+    @param publisher_year:
+    @param kwargs:
+    @return: request response
     """
-    if not isinstance(pkg_dict['metadata_created'], datetime):
-        pkg_dict['metadata_created'] = parser.parse(pkg_dict['metadata_created'])
 
-    return pkg_dict['metadata_created']
+    identifier = get_unique_identifier()
+    kwargs['identifier'] = identifier
+
+    metadata = MetadataDataCiteAPI()
+    metadata.upsert(**kwargs)
+
+    # The ID of a dataset never changes, so use that for the URL
+    site_url = config.get('ckan.site_url', '').rstrip('/')
+    # TEMP: Override development
+    site_url = 'http://data.nhm.ac.uk'
+    url = os.path.join(site_url, 'dataset', package_id)
+
+    doi = DOIDataCiteAPI()
+    r = doi.upsert(doi=identifier, url=url)
+    assert r.status_code == 201, 'Operation failed ERROR CODE: %s' % r.status_code
+
+    # If we have created the DOI, save it to the database
+    if r.text == 'OK':
+        doi = DOI(package_id=package_id, identifier=identifier)
+        Session.add(doi)
+
+    log.debug('Created new DOI for package %s' % package_id)
+
+
+def update_doi(package_id, **kwargs):
+
+    doi = get_doi(package_id)
+    kwargs['identifier'] = doi.identifier
+
+    metadata = MetadataDataCiteAPI()
+    metadata.upsert(**kwargs)
+
+
+def get_doi(package_id):
+    doi = Session.query(DOI).filter(DOI.package_id==package_id).first()
+    return doi
