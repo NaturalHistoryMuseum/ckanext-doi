@@ -3,14 +3,9 @@ ckanext-doi
 
 CKAN extension for assigning a digital object identifier (DOI) to datasets
 
-** STUB - DO NOT USE **
+ckanext.doi.account_name 
+ckanext.doi.account_password
+ckanext.doi.publisher = 
+ckanext.doi.prefix = 
+ckanext.doi.test_mode = True or False
 
-This is just a stub extension, which adds a dummy DOI to datasets.
-
-It doesn't do anything useful now - do not use.
-
-
-
-TODO: Save DOI
-Prevent changing path (or add another field that cannot be changed)
-Save DOI (see above)
