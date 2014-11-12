@@ -32,3 +32,17 @@ def get_endpoint():
 
     test_mode = config.get("ckanext.doi.test_mode")
     return TEST_ENDPOINT if test_mode else ENDPOINT
+
+
+def get_site_url():
+    """
+    Get the site URL
+    Try and use ckanext.doi.site_url but if that's not set use ckan.site_url
+    @return:
+    """
+    site_url = config.get("ckanext.doi.site_url")
+
+    if not site_url:
+        site_url = config.get('ckan.site_url')
+
+    return site_url.rstrip('/')

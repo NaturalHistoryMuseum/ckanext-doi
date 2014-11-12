@@ -11,7 +11,7 @@ from logging import getLogger
 from pylons import config
 from ckan.model import Session
 from requests.exceptions import HTTPError
-from ckanext.doi.config import get_prefix
+from ckanext.doi.config import get_prefix, get_site_url
 from ckanext.doi.api import MetadataDataCiteAPI, DOIDataCiteAPI
 from ckanext.doi.model import DOI
 
@@ -61,10 +61,7 @@ def create_doi(package_id, **kwargs):
     metadata.upsert(**kwargs)
 
     # The ID of a dataset never changes, so use that for the URL
-    site_url = config.get('ckan.site_url', '').rstrip('/')
-    # TEMP: Override development
-    site_url = 'http://data.nhm.ac.uk'
-    url = os.path.join(site_url, 'dataset', package_id)
+    url = os.path.join(get_site_url(), 'dataset', package_id)
 
     doi = DOIDataCiteAPI()
     r = doi.upsert(doi=identifier, url=url)

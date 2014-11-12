@@ -14,6 +14,7 @@ from ckan.common import c
 from ckanext.doi import model as doi_model
 from ckanext.doi.lib import get_doi, create_doi, update_doi
 from ckanext.doi.helpers import package_get_year, mandatory_field_is_editable
+from ckanext.doi.config import get_site_url
 
 get_action = logic.get_action
 
@@ -139,7 +140,7 @@ class DOIPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
 
         if doi:
             pkg_dict['doi'] = doi.identifier
-            pkg_dict['publisher'] = config.get("ckanext.doi.publisher")
+            pkg_dict['domain'] = get_site_url().replace('http://', '')
 
     ## IConfigurer
     def update_config(self, config):
