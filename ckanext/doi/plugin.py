@@ -55,10 +55,12 @@ class DOIPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
                 'creator': pkg_dict['author'],
                 'publisher': config.get("ckanext.doi.publisher"),
                 'publisher_year': package_get_year(pkg_dict),
-                # Derive format from the attached resources
-                'format': ', '.join([f for f in pkg_dict['res_format']]),
                 'description': pkg_dict['notes'],
             }
+
+            if 'res_format' in pkg_dict:
+                # Derive format from the attached resources
+                metadata['format'] = ', '.join([f for f in pkg_dict['res_format']])
 
             if 'tags' in pkg_dict:
                 metadata['subject'] = list(set([tag['name'] if isinstance(tag, dict) else tag for tag in pkg_dict['tags']]))
