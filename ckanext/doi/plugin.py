@@ -1,16 +1,15 @@
 """
 CKAN Contact Extension
 """
-import os
 import datetime
 import itertools
 from logging import getLogger
 import ckan.plugins as p
 import ckan.logic as logic
 import ckan.model as model
+from ckan.common import c
 from ckan.lib.helpers import json
 from pylons import config
-from ckan.common import c
 from ckanext.doi import model as doi_model
 from ckanext.doi.lib import get_doi, create_doi, update_doi
 from ckanext.doi.helpers import package_get_year, mandatory_field_is_editable
@@ -25,7 +24,6 @@ class DOIPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
     """
     CKAN DOI Extension
     """
-
     p.implements(p.IConfigurable)
     p.implements(p.IConfigurer)
     p.implements(p.IPackageController, inherit=True)
@@ -112,7 +110,6 @@ class DOIPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
         available in ckanext.doi.schema
 
         """
-
         mandatory_fields = ['title', 'author']
 
         # Make sure our mandatory fields are populated
