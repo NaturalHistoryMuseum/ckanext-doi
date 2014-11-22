@@ -207,7 +207,8 @@ class DOIDataCiteAPI(DataCiteAPI):
         @param doi: DOI
         @return: This request returns an URL associated with a given DOI.
         """
-        return self._call(path_extra=doi).text
+        r = self._call(path_extra=doi)
+        return r
 
     def list(self):
         """
