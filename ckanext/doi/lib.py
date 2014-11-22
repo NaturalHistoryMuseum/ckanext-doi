@@ -18,6 +18,9 @@ from ckanext.doi.model import DOI
 log = getLogger(__name__)
 
 
+UNIQUE_LOOKUP_LIMIT = 10
+
+
 def get_unique_identifier():
     """
     Loop generating a unique identifier
@@ -27,15 +30,21 @@ def get_unique_identifier():
     As multiple services can be minting DOIs
     @return:
     """
+    metadata = MetadataDataCiteAPI()
 
-    api = DOIDataCiteAPI()
-
-    while True:
+    # BS: Bugfix. This was using while True to keep calling until a unique identifier was found
+    # However, DataCite have just updated their API so calling DOIDataCiteAPI.get() for an
+    # unknown DOI now returns http://www.datacite.org/testprefix. Switched to using
+    # metadata look up service, and limit number of attempts to UNIQUE_LOOKUP_LIMIT
+    for _ in range(UNIQUE_LOOKUP_LIMIT):
         identifier = os.path.join(get_prefix(), '{0:07}'.format(random.randint(1, 100000)))
         try:
-            api.get(identifier)
+            metadata.get(identifier)
+            log.info('Identifier %s already exists', identifier)
         except HTTPError:
             return identifier
+
+    raise Exception('Could not find unique identifier after %s attempts' % UNIQUE_LOOKUP_LIMIT)
 
 
 def create_doi(package_id, **kwargs):
@@ -53,7 +62,6 @@ def create_doi(package_id, **kwargs):
     @param kwargs:
     @return: request response
     """
-
     identifier = get_unique_identifier()
     kwargs['identifier'] = identifier
 
