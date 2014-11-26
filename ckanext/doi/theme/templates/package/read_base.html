@@ -4,8 +4,9 @@ Adds DOI and citation information
 
 {% ckan_extends %}
 
-{% block package_social %}
-    {% block citation %}
+{% block secondary_content %}
+
+    {% block package_citation %}
 
         {% if c.pkg_dict['doi'] %}
 
@@ -25,3 +26,4 @@ Adds DOI and citation information
     {{ super() }}
 
 {% endblock %}
+
