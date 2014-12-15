@@ -11,9 +11,9 @@ from ckan.common import c
 from ckan.lib.helpers import json
 from pylons import config
 from ckanext.doi import model as doi_model
-from ckanext.doi.lib import get_doi, create_doi, update_doi
+from ckanext.doi.lib import get_doi, create_doi, update_doi, doi_is_test
 from ckanext.doi.helpers import package_get_year, mandatory_field_is_editable
-from ckanext.doi.config import get_site_url
+from ckanext.doi.config import get_site_url, get_test_mode
 
 get_action = logic.get_action
 

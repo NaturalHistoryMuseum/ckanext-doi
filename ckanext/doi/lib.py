@@ -11,9 +11,10 @@ from logging import getLogger
 from pylons import config
 from ckan.model import Session
 from requests.exceptions import HTTPError
-from ckanext.doi.config import get_prefix, get_site_url
+from ckanext.doi.config import get_prefix, get_site_url, TEST_PREFIX
 from ckanext.doi.api import MetadataDataCiteAPI, DOIDataCiteAPI
 from ckanext.doi.model import DOI
+
 
 log = getLogger(__name__)
 
@@ -95,3 +96,13 @@ def update_doi(package_id, **kwargs):
 def get_doi(package_id):
     doi = Session.query(DOI).filter(DOI.package_id==package_id).first()
     return doi
+
+def doi_is_test(doi):
+    """
+    Evaluate whether a DOI is a test one or not
+    (contains TEST_PREFIX)
+    @param doi:
+    @return:
+    """
+
+    return bool(TEST_PREFIX in doi.identifier)
