@@ -10,7 +10,7 @@ from paste.deploy.converters import asbool
 
 TEST_PREFIX = '10.5072'
 
-ENDPOINT = 'https://test.datacite.org/mds'
+ENDPOINT = 'https://mds.datacite.org'
 TEST_ENDPOINT = 'https://test.datacite.org/mds'
 
 
