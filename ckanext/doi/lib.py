@@ -66,31 +66,34 @@ def create_doi(package_id, **kwargs):
     identifier = get_unique_identifier()
     kwargs['identifier'] = identifier
 
-    metadata = MetadataDataCiteAPI()
-    metadata.upsert(**kwargs)
+    print identifier
 
-    # The ID of a dataset never changes, so use that for the URL
-    url = os.path.join(get_site_url(), 'dataset', package_id)
-
-    doi = DOIDataCiteAPI()
-    r = doi.upsert(doi=identifier, url=url)
-    assert r.status_code == 201, 'Operation failed ERROR CODE: %s' % r.status_code
-
-    # If we have created the DOI, save it to the database
-    if r.text == 'OK':
-        doi = DOI(package_id=package_id, identifier=identifier)
-        Session.add(doi)
-
-    log.debug('Created new DOI for package %s' % package_id)
+    # metadata = MetadataDataCiteAPI()
+    # metadata.upsert(**kwargs)
+    #
+    # # The ID of a dataset never changes, so use that for the URL
+    # url = os.path.join(get_site_url(), 'dataset', package_id)
+    #
+    # doi = DOIDataCiteAPI()
+    # r = doi.upsert(doi=identifier, url=url)
+    # assert r.status_code == 201, 'Operation failed ERROR CODE: %s' % r.status_code
+    #
+    # # If we have created the DOI, save it to the database
+    # if r.text == 'OK':
+    #     doi = DOI(package_id=package_id, identifier=identifier)
+    #     Session.add(doi)
+    #
+    # log.debug('Created new DOI for package %s' % package_id)
 
 
 def update_doi(package_id, **kwargs):
+    pass
 
-    doi = get_doi(package_id)
-    kwargs['identifier'] = doi.identifier
-
-    metadata = MetadataDataCiteAPI()
-    metadata.upsert(**kwargs)
+    # doi = get_doi(package_id)
+    # kwargs['identifier'] = doi.identifier
+    #
+    # metadata = MetadataDataCiteAPI()
+    # metadata.upsert(**kwargs)
 
 
 def get_doi(package_id):
