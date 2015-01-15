@@ -82,9 +82,12 @@ class MetadataDataCiteAPI(DataCiteAPI):
         def _ensure_list(var):
             return var if isinstance(var, list) else [var]
 
+        # Encode title ready for posting
+        title = title.encode('unicode-escape')
+
         # Optional metadata properties
         subject = kwargs.get('subject')
-        description = kwargs.get('description')
+        description = kwargs.get('description').encode('unicode-escape')
         size = kwargs.get('size')
         format = kwargs.get('format')
         version = kwargs.get('version')
