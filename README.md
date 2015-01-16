@@ -1,7 +1,7 @@
 ckanext-doi
 ===========
 
-CKAN extension for assigning a digital object identifier (DOI) to datasets
+CKAN extension for assigning a digital object identifier (DOI) to datasets, using DataCite DOI service.
 
 ckanext.doi.account_name 
 ckanext.doi.account_password
