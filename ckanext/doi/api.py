@@ -110,7 +110,7 @@ class MetadataDataCiteAPI(DataCiteAPI):
                     'title': {'#text': title}
                 },
                 'creators': {
-                    'creator': [{'creatorName': c} for c in _ensure_list(creator)],
+                    'creator': [{'creatorName': c.encode('unicode-escape')} for c in _ensure_list(creator)],
                 },
                 'publisher': publisher,
                 'publicationYear': publisher_year,

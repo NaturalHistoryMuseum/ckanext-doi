@@ -7,8 +7,8 @@ Copyright (c) 2013 'bens3'. All rights reserved.
 
 import os
 import random
+import datetime
 from logging import getLogger
-from pylons import config
 from ckan.model import Session
 from requests.exceptions import HTTPError
 from ckanext.doi.config import get_prefix, get_site_url, TEST_PREFIX
@@ -19,39 +19,42 @@ from ckanext.doi.model import DOI
 log = getLogger(__name__)
 
 
-UNIQUE_LOOKUP_LIMIT = 10
-
-
-def get_unique_identifier():
+def create_unique_identifier(package_id):
     """
-    Loop generating a unique identifier
-    Checks if it already exists - if it doesn't we can use it
-    If it does already exist, generate another one
-    We check against the datacite repository, rather than our own internal database
-    As multiple services can be minting DOIs
+    Create a unique identifier, using the prefix and a random number: 10.5072/0044634
+    Checks the random number doesn't exist in the table or the datacite repository
+    All unique identifiers are created with
     @return:
     """
-    metadata = MetadataDataCiteAPI()
+    datacite_api = DOIDataCiteAPI()
 
-    # BS: Bugfix. This was using while True to keep calling until a unique identifier was found
-    # However, DataCite have just updated their API so calling DOIDataCiteAPI.get() for an
-    # unknown DOI now returns http://www.datacite.org/testprefix. Switched to using
-    # metadata look up service, and limit number of attempts to UNIQUE_LOOKUP_LIMIT
-    for _ in range(UNIQUE_LOOKUP_LIMIT):
+    while True:
+
         identifier = os.path.join(get_prefix(), '{0:07}'.format(random.randint(1, 100000)))
-        try:
-            metadata.get(identifier)
-            log.info('Identifier %s already exists', identifier)
-        except HTTPError:
-            return identifier
 
-    raise Exception('Could not find unique identifier after %s attempts' % UNIQUE_LOOKUP_LIMIT)
+        # Check this identifier doesn't exist in the table
+        if not Session.query(DOI).filter(DOI.identifier == identifier).count():
+
+            # And check against the datacite service
+            try:
+                datacite_doi = datacite_api.get(identifier)
+            except HTTPError:
+                pass
+            else:
+                if datacite_doi.text:
+                    continue
+
+        doi = DOI(package_id=package_id, identifier=identifier)
+        Session.add(doi)
+
+        return identifier
 
 
-def create_doi(package_id, **kwargs):
+def publish_doi(package_id, **kwargs):
 
     """
-    Helper function for minting a new doi
+    Publish a DOI to DataCite
+
     Need to create metadata first
     And then create DOI => URI association
     See MetadataDataCiteAPI.metadata_to_xml for param information
@@ -63,8 +66,7 @@ def create_doi(package_id, **kwargs):
     @param kwargs:
     @return: request response
     """
-    identifier = get_unique_identifier()
-    kwargs['identifier'] = identifier
+    identifier = kwargs.get('identifier')
 
     metadata = MetadataDataCiteAPI()
     metadata.upsert(**kwargs)
@@ -78,17 +80,18 @@ def create_doi(package_id, **kwargs):
 
     # If we have created the DOI, save it to the database
     if r.text == 'OK':
-        doi = DOI(package_id=package_id, identifier=identifier)
-        Session.add(doi)
+        # Update status for this package and identifier
+        num_affected = Session.query(DOI).filter_by(package_id=package_id, identifier=identifier).update({"published": datetime.datetime.now()})
+        # Raise an error if update has failed - should never happen unless
+        # DataCite and local db get out of sync - in which case requires investigating
+        assert num_affected == 1, 'Updating local DOI failed'
 
     log.debug('Created new DOI for package %s' % package_id)
 
 
 def update_doi(package_id, **kwargs):
-
     doi = get_doi(package_id)
     kwargs['identifier'] = doi.identifier
-
     metadata = MetadataDataCiteAPI()
     metadata.upsert(**kwargs)
 
@@ -96,13 +99,3 @@ def update_doi(package_id, **kwargs):
 def get_doi(package_id):
     doi = Session.query(DOI).filter(DOI.package_id==package_id).first()
     return doi
-
-def doi_is_test(doi):
-    """
-    Evaluate whether a DOI is a test one or not
-    (contains TEST_PREFIX)
-    @param doi:
-    @return:
-    """
-
-    return bool(TEST_PREFIX in doi.identifier)
