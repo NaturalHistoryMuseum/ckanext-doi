@@ -10,7 +10,7 @@ import ckan.model as model
 from ckan.lib import helpers as h
 from ckan.common import c
 from pylons import config
-from ckanext.doi import model as doi_model
+from ckanext.doi.model import doi as doi_model
 from ckanext.doi.lib import get_doi, publish_doi, update_doi, create_unique_identifier
 from ckanext.doi.helpers import package_get_year
 from ckanext.doi.config import get_site_url

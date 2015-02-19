@@ -23,8 +23,6 @@ setup(
     	doi=ckanext.doi.plugin:DOIPlugin
 
     [paste.paster_command]
-        delete-test-doi=ckanext.doi.commands.delete_test_doi:DeleteTestDOICommand
-
-
+        doi=ckanext.doi.commands.doi:DOICommand
 	""",
 )

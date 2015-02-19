@@ -13,7 +13,7 @@ from ckan.model import Session
 from requests.exceptions import HTTPError
 from ckanext.doi.config import get_prefix, get_site_url, TEST_PREFIX
 from ckanext.doi.api import MetadataDataCiteAPI, DOIDataCiteAPI
-from ckanext.doi.model import DOI
+from ckanext.doi.model.doi import DOI
 
 
 log = getLogger(__name__)

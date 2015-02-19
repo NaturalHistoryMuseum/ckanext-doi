@@ -1,10 +1,4 @@
-import itertools
-from pylons import config
-import ckan.model as model
-from ckan.common import c
-from ckan.lib.helpers import json
 import ckan.plugins.interfaces as interfaces
-from ckanext.doi.helpers import package_get_year
 
 class IDoi(interfaces.Interface):
     """
