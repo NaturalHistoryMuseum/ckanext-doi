@@ -16,8 +16,7 @@ log = getLogger(__name__)
 doi_table = Table('doi', meta.metadata,
                   Column('identifier', types.UnicodeText, primary_key=True),
                   Column('package_id', types.UnicodeText, ForeignKey('package.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=False, unique=True),
-                  # Column('published', types.DateTime, nullable=True),  # Date DOI was published to DataCite
-                   Column('created', types.DateTime, default=datetime.now, nullable=False)
+                  Column('published', types.DateTime, nullable=True),  # Date DOI was published to DataCite
 )
 
 class DOI(DomainObject):

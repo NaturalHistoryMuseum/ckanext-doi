@@ -1,17 +1,17 @@
-from sqlalchemy import *
-from migrate import *
-
 
 def upgrade(migrate_engine):
-    meta = MetaData()
-
-    a1 = Table('a1', meta,
-      Column('id', Integer() ,  primary_key=True, nullable=False),
-      Column('name', Unicode(100)),
+    # Add the published date column
+    migrate_engine.execute('''
+        ALTER TABLE doi
+            ADD COLUMN published timestamp without time zone;
+    '''
     )
 
-    meta.bind = migrate_engine
-    meta.create_all()
+    # Copy original created date to the new published column
+    migrate_engine.execute('''
+        UPDATE doi SET published = created;
+    '''
+    )
 
 def downgrade(migrate_engine):
     raise NotImplementedError()
