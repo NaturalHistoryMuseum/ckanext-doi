@@ -27,6 +27,7 @@ Uses DataCite Metadata Schema v 3.1 https://schema.datacite.org/meta/kernel-3.1/
 Dataset package fields and CKAN config settings are mapped to the DataCite Schema  
 
 |CKAN Dataset Field                 |DataCite Schema
+|--- | ---
 |dataset:title                      |title
 |dataset:creator                    |author
 |config:ckanext.doi.publisher       |publisher
