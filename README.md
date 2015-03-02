@@ -51,26 +51,33 @@ This plugin implements a build_metadata interface, so the metadata can be custom
 See [Natural History Museum extension](https://github.com/NaturalHistoryMuseum/ckanext-nhm) for an implementation of this interface. 
 
 
-
-
 Configuration
 -------------
 
-ckanext.doi.account_name 
-ckanext.doi.account_password
-ckanext.doi.publisher = 
+ckanext.doi.account_name =
+ckanext.doi.account_password =
 ckanext.doi.prefix = 
+ckanext.doi.publisher = 
 ckanext.doi.test_mode = True or False
 ckanext.doi.site_url =  # Defaults to ckan.site_url if not set 
+
+Account name, password and prefix will be provided by your DataCite provider.
+ 
+Publisher is the name of the publishing institution - eg: Natural History Museum.
+
+The site URL is used to build the link back to the dataset:
+
+http://[site_url]/datatset/package_id
+
+If site_url is not set, ckan.site_url will be used instead.
 
 
 If test mode is set to true, the DOIs will use the DataCite test prefix 10.5072
 
-To delete all 
+To delete all test prefixes, use the command:
 
-paster delete-test-doi -c /etc/ckan/default/development.ini
+paster doi delete-tests -c /etc/ckan/default/development.ini
 
-Enable the module
 
 Releases
 --------
@@ -81,11 +88,22 @@ Initial release
 
 ### 0.2
 
-Added dataset embargoing. If a dataset is created in draft or not
+A DOI will be created regardless od Dataset status. 
+Only when a dataset is active and public will the DOI and MetaData be published to DataCite.
 
-Removed locking of 
+Removed locking of DOI metadata fields after 10 days.  This is an interim solution before implementing DOI versioning. 
 
-Release notes 
+Added build_metadata interface (and moved custom NHM metadata fields to ckanext-nhm).
+
+Added schema migration command.
 
 
+Release migrations
+------------------
+
+Version 0.2 requires a schema change 001 & 002 - adds DOI published date and removes DOI created columns.
+
+Run with:
+
+paster doi upgrade-db -c /etc/ckan/default/development.ini
 
