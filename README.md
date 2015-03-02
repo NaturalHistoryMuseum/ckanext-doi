@@ -54,12 +54,14 @@ See [Natural History Museum extension](https://github.com/NaturalHistoryMuseum/c
 Configuration
 -------------
 
+```python
 ckanext.doi.account_name =
 ckanext.doi.account_password =
 ckanext.doi.prefix = 
 ckanext.doi.publisher = 
 ckanext.doi.test_mode = True or False
 ckanext.doi.site_url =  # Defaults to ckan.site_url if not set 
+```
 
 Account name, password and prefix will be provided by your DataCite provider.
  
@@ -76,8 +78,9 @@ If test mode is set to true, the DOIs will use the DataCite test prefix 10.5072
 
 To delete all test prefixes, use the command:
 
+```python
 paster doi delete-tests -c /etc/ckan/default/development.ini
-
+```
 
 Releases
 --------
