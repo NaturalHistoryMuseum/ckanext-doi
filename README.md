@@ -98,10 +98,12 @@ Added build_metadata interface (and moved custom NHM metadata fields to ckanext-
 Added schema migration command.
 
 
-Release migrations
-------------------
+Upgrade notes
+-------------
 
-Version 0.2 requires a schema change 001 & 002 - adds DOI published date and removes DOI created columns.
+### 0.2
+
+Requires a schema change 001 & 002 - adds DOI published date and removes DOI created columns. See ckanext.doi.migration
 
 Run with:
 
