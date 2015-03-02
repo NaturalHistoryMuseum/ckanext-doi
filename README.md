@@ -107,5 +107,6 @@ Requires a schema change 001 & 002 - adds DOI published date and removes DOI cre
 
 Run with:
 
+```python
 paster doi upgrade-db -c /etc/ckan/default/development.ini
-
+```
