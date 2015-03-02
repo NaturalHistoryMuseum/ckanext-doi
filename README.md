@@ -4,16 +4,15 @@ ckanext-doi
 Overview
 --------
 
-CKAN extension for assigning a digital object identifier (DOI) to datasets, using DataCite DOI service.
+CKAN extension for assigning a digital object identifier (DOI) to datasets, using the DataCite DOI service.
 
-When a new dataset is created it will be assigned a new DOI. This DOI will be in the format:
+When a new dataset is created it is assigned a new DOI. This DOI will be in the format:
  
 http://dx.doi.org/[prefix]/[random 7 digit integer]
 
-If the new dataset is active and public, the DOI will be registered with DataCite.
+If the new dataset is active and public, the DOI and metadata will be registered with DataCite.
  
-If the dataset is draft or private, the DOI will not be registered with DataCite. 
-When the dataset is made active & public, the DOI will be submitted. 
+If the dataset is draft or private, the DOI will not be registered with DataCite.  When the dataset is made active & public, the DOI will be submitted. 
 This allows datasets to be embargoed, but still provides a DOi to be referenced in publications.     
 
 You will need an account with a DataCite DOI service provider to use this extension.
@@ -113,3 +112,12 @@ Run with:
 ```python
 paster doi upgrade-db -c /etc/ckan/default/development.ini
 ```
+
+Roadmap
+-------
+
+Features planned for development.
+
+1. DOI versioning - allow option to create a new DOI on update (or if core metadata fields are updated).  This new DOI will be linked to the master/original DOI.
+
+2. Embargoed for set length of time. User can select date on which the dataset is to be made public, and the DOI submitted to DataCite.  
