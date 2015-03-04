@@ -120,4 +120,6 @@ Features planned for development.
 
 1. DOI versioning - allow option to create a new DOI on update (or if core metadata fields are updated).  This new DOI will be linked to the master/original DOI.
 
-2. Embargoed for set length of time. User can select date on which the dataset is to be made public, and the DOI submitted to DataCite.  
+2. Embargoed for set length of time. User can select date on which the dataset is to be made public, and the DOI submitted to DataCite. 
+ 
+3. Tests. There are no tests.
