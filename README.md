@@ -20,7 +20,7 @@ You will need an account with a DataCite DOI service provider to use this extens
 Installation
 ------------
 
-This extension can be installed in the same way as any other - download it, ectivate it and enable the plugin. http://docs.ckan.org/en/latest/extensions/tutorial.html#installing-the-extension
+This extension can be installed in the same way as any other - download it, activate it and enable the plugin. http://docs.ckan.org/en/latest/extensions/tutorial.html#installing-the-extension
 
 However it will only work if you have signed up for an account with DataCite.  
 
