@@ -17,6 +17,15 @@ This allows datasets to be embargoed, but still provides a DOi to be referenced 
 
 You will need an account with a DataCite DOI service provider to use this extension.
 
+Installation
+------------
+
+This extension can be installed in the same way as any other - download it, activate it and enable the plugin. http://docs.ckan.org/en/latest/extensions/tutorial.html#installing-the-extension
+
+However it will only work if you have signed up for an account with DataCite.  
+
+You will need a development / test account to use this plugin in test mode.  And to mint active DOIs you will need a live DataCite account.
+
 
 DOI Metadata
 ------------
