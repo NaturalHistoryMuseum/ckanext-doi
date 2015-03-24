@@ -21,3 +21,7 @@ def package_get_year(pkg_dict):
 
     return pkg_dict['metadata_created'].year
 
+
+def now():
+    return datetime.datetime.now()
+

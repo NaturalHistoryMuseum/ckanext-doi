@@ -1,7 +1,6 @@
 """
 CKAN DOI Plugin
 """
-import datetime
 import itertools
 from logging import getLogger
 import ckan.plugins as p
@@ -12,7 +11,7 @@ from ckan.common import c
 from pylons import config
 from ckanext.doi.model import doi as doi_model
 from ckanext.doi.lib import get_doi, publish_doi, update_doi, create_unique_identifier
-from ckanext.doi.helpers import package_get_year
+from ckanext.doi.helpers import package_get_year, now
 from ckanext.doi.config import get_site_url
 from ckanext.doi.interfaces import IDoi
 from ckanext.doi.exc import DOIMetadataException
@@ -203,5 +202,5 @@ class DOIPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
     def get_helpers(self):
         return {
             'package_get_year': package_get_year,
-            'now': datetime.datetime.now
+            'now': now
         }
