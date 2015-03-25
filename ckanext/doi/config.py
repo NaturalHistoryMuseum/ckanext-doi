@@ -19,8 +19,7 @@ def get_test_mode():
     Get test mode as boolean
     @return:
     """
-
-    return asbool(config.get("ckanext.doi.test_mode"))
+    return asbool(config.get("ckanext.doi.test_mode", True))
 
 
 def get_prefix():
