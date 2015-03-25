@@ -46,8 +46,9 @@ def create_unique_identifier(package_id):
 
         doi = DOI(package_id=package_id, identifier=identifier)
         Session.add(doi)
+        Session.commit()
 
-        return identifier
+        return doi
 
 
 def publish_doi(package_id, **kwargs):

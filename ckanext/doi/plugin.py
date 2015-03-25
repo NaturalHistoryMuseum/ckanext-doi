@@ -77,6 +77,12 @@ class DOIPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
             # Load the local DOI
             doi = get_doi(package_id)
 
+            # If we don't have a DOI, create one
+            # This could happen if the DOI module is enabled after a dataset has been creates
+
+            if not doi:
+                doi = create_unique_identifier(package_id)
+
             # Build the metadata dict to pass to DataCite service
             metadata_dict = self.build_metadata(pkg_dict, doi)
 
