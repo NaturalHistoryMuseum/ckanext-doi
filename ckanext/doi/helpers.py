@@ -23,5 +23,5 @@ def package_get_year(pkg_dict):
 
 
 def now():
-    return datetime.datetime.now()
+    return datetime.now()
 
