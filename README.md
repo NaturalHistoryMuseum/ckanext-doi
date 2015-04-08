@@ -49,7 +49,7 @@ Dataset package fields and CKAN config settings are mapped to the DataCite Schem
 
 DataCite title and author are mandatory metadata fields, so dataset title and creator fields are made required fields. 
 This has been implemented in the theme layer, with another check in IPackageController.after_update, which raises
-an exception if the title or author fields do not exist. 
+a DOIMetadataException if the title or author fields do not exist. 
 
 It is recommended plugins implementing DOIs add additional validation checks to their schema.
 
@@ -106,7 +106,7 @@ Removed locking of DOI metadata fields after 10 days.  This is an interim soluti
 
 Added build_metadata interface (and moved custom NHM metadata fields to ckanext-nhm).
 
-Added schema migration command.
+Added schema migration command.r
 
 
 Upgrade notes
