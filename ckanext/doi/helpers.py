@@ -8,7 +8,6 @@ Copyright (c) 2013 'bens3'. All rights reserved.
 
 from datetime import datetime, timedelta
 import dateutil.parser as parser
-from ckanext.doi.lib import get_doi
 
 def package_get_year(pkg_dict):
     """

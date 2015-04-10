@@ -8,9 +8,10 @@ Copyright (c) 2013 'bens3'. All rights reserved.
 import os
 import abc
 import requests
+from requests import ConnectionError
 from pylons import config
 from xmltodict import unparse
-from ckanext.doi.config import get_endpoint
+from ckanext.doi.datacite import get_endpoint
 
 class DataCiteAPI(object):
 
@@ -39,12 +40,10 @@ class DataCiteAPI(object):
         # Add authorisation to request
         kwargs['auth'] = (account_name, account_password)
 
-        # Perform the request
-        r = getattr(requests, method)(endpoint, **kwargs)
-
-        # Raise exception if we have an error
+        # BS: Bugfix. The create DOI call test service returns a redirect
+        # To a dead link - so prevent redirect and anything works OK
+        r = getattr(requests, method)(endpoint, allow_redirects=False, **kwargs)
         r.raise_for_status()
-
         # Return the result
         return r
 
