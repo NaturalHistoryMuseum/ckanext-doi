@@ -12,6 +12,9 @@ from requests import ConnectionError
 from pylons import config
 from xmltodict import unparse
 from ckanext.doi.datacite import get_endpoint
+from logging import getLogger
+
+log = getLogger(__name__)
 
 class DataCiteAPI(object):
 
@@ -40,9 +43,9 @@ class DataCiteAPI(object):
         # Add authorisation to request
         kwargs['auth'] = (account_name, account_password)
 
-        # BS: Bugfix. The create DOI call test service returns a redirect
-        # To a dead link - so prevent redirect and anything works OK
-        r = getattr(requests, method)(endpoint, allow_redirects=False, **kwargs)
+        log.info("Calling %s:%s - %s", endpoint, method, kwargs)
+
+        r = getattr(requests, method)(endpoint, **kwargs)
         r.raise_for_status()
         # Return the result
         return r
@@ -231,12 +234,13 @@ class DOIDataCiteAPI(DataCiteAPI):
         @return:
         """
         return self._call(
-            params={
+            # Send as data rather than params so it's posted as x-www-form-urlencoded
+            data={
                 'doi': doi,
                 'url': url
             },
             method='post',
-            headers={'Content-Type': 'text/plain;charset=UTF-8'}
+            headers={'Content-Type': 'application/x-www-form-urlencoded'}
         )
 
 class MediaDataCiteAPI(DataCiteAPI):
