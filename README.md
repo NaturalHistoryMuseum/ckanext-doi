@@ -69,6 +69,7 @@ ckanext.doi.prefix =
 ckanext.doi.publisher = 
 ckanext.doi.test_mode = True or False
 ckanext.doi.site_url =  # Defaults to ckan.site_url if not set 
+ckanext.doi.site_title = # Optional - site title to use in the citation - eg Natural History Museum Data Portal (data.nhm.ac.uk)
 ```
 
 Account name, password and prefix will be provided by your DataCite provider.

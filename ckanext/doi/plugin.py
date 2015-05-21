@@ -1,20 +1,13 @@
 """
 CKAN DOI Plugin
 """
-import itertools
 from logging import getLogger
 import ckan.plugins as p
 import ckan.logic as logic
-import ckan.model as model
 from ckan.lib import helpers as h
-from ckan.common import c
-from pylons import config
 from ckanext.doi.model import doi as doi_model
-from ckanext.doi.lib import get_doi, publish_doi, update_doi, create_unique_identifier
-from ckanext.doi.helpers import package_get_year, now
-from ckanext.doi.config import get_site_url
-from ckanext.doi.interfaces import IDoi
-from ckanext.doi.exc import DOIMetadataException
+from ckanext.doi.lib import get_doi, publish_doi, update_doi, create_unique_identifier, get_site_url, build_metadata, validate_metadata
+from ckanext.doi.helpers import package_get_year, now, get_site_title
 
 get_action = logic.get_action
 
@@ -84,12 +77,12 @@ class DOIPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
                 doi = create_unique_identifier(package_id)
 
             # Build the metadata dict to pass to DataCite service
-            metadata_dict = self.build_metadata(pkg_dict, doi)
+            metadata_dict = build_metadata(pkg_dict, doi)
 
             # Perform some basic checks against the data - we require at the very least
             # title and author fields - they're mandatory in the DataCite Schema
             # This will only be an issue if another plugin has removed a mandatory field
-            self.validate_metadata(metadata_dict)
+            validate_metadata(metadata_dict)
 
             # Is this an existing DOI? Update it
             if doi.published:
@@ -114,91 +107,10 @@ class DOIPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
 
         return pkg_dict
 
-    @staticmethod
-    def build_metadata(pkg_dict, doi):
-
-        # Build the datacite metadata - all of these are core CKAN fields which should
-        # be the same across all CKAN sites
-        # This builds a dictionary keyed by the datacite metadata xml schema
-        metadata_dict = {
-            'identifier': doi.identifier,
-            'title': pkg_dict['title'],
-            'creator': pkg_dict['author'],
-            'publisher': config.get("ckanext.doi.publisher"),
-            'publisher_year': package_get_year(pkg_dict),
-            'description': pkg_dict['notes'],
-        }
-
-        # Convert the format to comma delimited
-        try:
-            # Filter out empty strings in the array (which is what we have if nothing is entered)
-            # We want to make sure all None values are removed so we can compare
-            # the dict here, with one loaded via action.package_show which doesn't
-            # return empty values
-            pkg_dict['res_format'] = filter(None, pkg_dict['res_format'])
-            if pkg_dict['res_format']:
-                metadata_dict['format'] = ', '.join([f for f in pkg_dict['res_format']])
-        except KeyError:
-            pass
-
-        # If we have tag_string use that to build subject
-        if 'tag_string' in pkg_dict:
-            metadata_dict['subject'] = pkg_dict.get('tag_string', '').split(',').sort()
-        elif 'tags' in pkg_dict:
-            # Otherwise use the tags list itself
-            metadata_dict['subject'] = list(set([tag['name'] if isinstance(tag, dict) else tag for tag in pkg_dict['tags']])).sort()
-
-        if pkg_dict['license_id'] != 'notspecified':
-
-            licenses = model.Package.get_license_options()
-
-            for license_title, license_id in licenses:
-                if license_id == pkg_dict['license_id']:
-                    metadata_dict['rights'] = license_title
-                    break
-
-        if pkg_dict.get('version', None):
-            metadata_dict['version'] = pkg_dict['version']
-
-        # Try and get spatial
-        if 'extras_spatial' in pkg_dict and pkg_dict['extras_spatial']:
-            geometry = h.json.loads(pkg_dict['extras_spatial'])
-
-            if geometry['type'] == 'Point':
-                metadata_dict['geo_point'] = '%s %s' % tuple(geometry['coordinates'])
-            elif geometry['type'] == 'Polygon':
-                # DataCite expects box coordinates, not geo pairs
-                # So dedupe to get the box and join into a string
-                metadata_dict['geo_box'] = ' '.join([str(coord) for coord in list(set(itertools.chain.from_iterable(geometry['coordinates'][0])))])
-
-        # Allow plugins to alter the datacite DOI metadata
-        # So other CKAN instances can add their own custom fields - and we can
-        # Add our data custom to NHM
-        for plugin in p.PluginImplementations(IDoi):
-            plugin.build_metadata(pkg_dict, metadata_dict)
-
-        return metadata_dict
-
-    @staticmethod
-    def validate_metadata(metadata_dict):
-        """
-        Validate the metadata - loop through mandatory fields and check they are populated
-        """
-
-        # Check we have mandatory DOI fields
-        mandatory_fields = ['title', 'creator']
-
-        # Make sure our mandatory fields are populated
-        for field in mandatory_fields:
-            if not metadata_dict.get(field, None):
-                raise DOIMetadataException('Missing DataCite required field %s' % field)
-
     ## IPackageController
     def after_show(self, context, pkg_dict):
-
         # Load the DOI ready to display
         doi = get_doi(pkg_dict['id'])
-
         if doi:
             pkg_dict['doi'] = doi.identifier
             pkg_dict['doi_status'] = True if doi.published else False
@@ -208,5 +120,6 @@ class DOIPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
     def get_helpers(self):
         return {
             'package_get_year': package_get_year,
-            'now': now
+            'now': now,
+            'get_site_title': get_site_title
         }

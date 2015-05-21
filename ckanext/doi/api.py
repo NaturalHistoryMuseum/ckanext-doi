@@ -8,9 +8,13 @@ Copyright (c) 2013 'bens3'. All rights reserved.
 import os
 import abc
 import requests
+from requests import ConnectionError
 from pylons import config
 from xmltodict import unparse
-from ckanext.doi.config import get_endpoint
+from ckanext.doi.datacite import get_endpoint
+from logging import getLogger
+
+log = getLogger(__name__)
 
 class DataCiteAPI(object):
 
@@ -39,12 +43,10 @@ class DataCiteAPI(object):
         # Add authorisation to request
         kwargs['auth'] = (account_name, account_password)
 
-        # Perform the request
+        log.info("Calling %s:%s - %s", endpoint, method, kwargs)
+
         r = getattr(requests, method)(endpoint, **kwargs)
-
-        # Raise exception if we have an error
         r.raise_for_status()
-
         # Return the result
         return r
 
@@ -232,12 +234,13 @@ class DOIDataCiteAPI(DataCiteAPI):
         @return:
         """
         return self._call(
-            params={
+            # Send as data rather than params so it's posted as x-www-form-urlencoded
+            data={
                 'doi': doi,
                 'url': url
             },
             method='post',
-            headers={'Content-Type': 'text/plain;charset=UTF-8'}
+            headers={'Content-Type': 'application/x-www-form-urlencoded'}
         )
 
 class MediaDataCiteAPI(DataCiteAPI):
