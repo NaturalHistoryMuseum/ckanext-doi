@@ -13,9 +13,6 @@ import ckan.model as model
 import ckan.config.middleware as middleware
 from nose.tools import assert_equal, assert_true, assert_false, assert_in, assert_raises, assert_is_not_none, assert_is_none, assert_is_instance
 
-from ckanext.doi.model.doi import DOI
-from ckanext.doi.lib import get_doi, publish_doi, update_doi, create_unique_identifier, build_metadata, validate_metadata
-
 log = getLogger(__name__)
 
 class TestDOI(tests.WsgiAppCase):
@@ -30,9 +27,6 @@ class TestDOI(tests.WsgiAppCase):
     @classmethod
     def setup_class(cls):
         """Prepare the test"""
-        # We need datastore for these tests.
-        if not tests.is_datastore_supported():
-            raise nose.SkipTest("Datastore not supported")
 
         # Setup a test app
         wsgiapp = middleware.make_app(config['global_conf'], **config)
@@ -67,21 +61,24 @@ class TestDOI(tests.WsgiAppCase):
         """
         account_name = config.get("ckanext.doi.account_name")
         account_password = config.get("ckanext.doi.account_password")
-
         assert_is_not_none(account_name)
         assert_is_not_none(account_password)
 
-    def test_create_identifier(self):
+    def test_doi_create_identifier(self):
         """
         Test a DOI has been created with the package
+        We won't have tried pushing to the DataCite service
         :return:
         """
 
+        # Import now otherwise we get model creation errors
+        import ckanext.doi.lib as doi_lib
+
         # Show the package - which will load the DOI
-        identifier = create_unique_identifier(self.package_dict['id'])
+        identifier = doi_lib.create_unique_identifier(self.package_dict['id'])
 
         # Make sure we have a DOI model
-        assert_is_instance(identifier, DOI)
+        assert_is_instance(identifier, doi_lib.DOI)
 
         # And the package ID is correct
         assert_equal(identifier.package_id, self.package_dict['id'])
@@ -95,46 +92,50 @@ class TestDOI(tests.WsgiAppCase):
         :return:
         """
 
-        doi = get_doi(self.package_dict['id'])
+        import ckanext.doi.lib as doi_lib
+
+        doi = doi_lib.get_doi(self.package_dict['id'])
 
         if not doi:
-            doi = create_unique_identifier(self.package_dict['id'])
+            doi = doi_lib.create_unique_identifier(self.package_dict['id'])
 
         # Build the metadata dict to pass to DataCite service
-        metadata_dict = build_metadata(self.package_dict, doi)
+        metadata_dict = doi_lib.build_metadata(self.package_dict, doi)
 
         # Perform some basic checks against the data - we require at the very least
         # title and author fields - they're mandatory in the DataCite Schema
         # This will only be an issue if another plugin has removed a mandatory field
-        validate_metadata(metadata_dict)
+        doi_lib.validate_metadata(metadata_dict)
 
-    def test_publish_doi(self):
+    def test_doi_publish_datacite(self):
 
-        doi = get_doi(self.package_dict['id'])
+        import ckanext.doi.lib as doi_lib
+
+        doi = doi_lib.get_doi(self.package_dict['id'])
 
         if not doi:
-            doi = create_unique_identifier(self.package_dict['id'])
+            doi = doi_lib.create_unique_identifier(self.package_dict['id'])
 
         # Build the metadata dict to pass to DataCite service
-        metadata_dict = build_metadata(self.package_dict, doi)
+        metadata_dict = doi_lib.build_metadata(self.package_dict, doi)
 
         # Perform some basic checks against the data - we require at the very least
         # title and author fields - they're mandatory in the DataCite Schema
         # This will only be an issue if another plugin has removed a mandatory field
-        validate_metadata(metadata_dict)
+        doi_lib.validate_metadata(metadata_dict)
 
-        publish_doi(self.package_dict['id'], **metadata_dict)
-
-    def create_dataset(self):
-        """
-        TODO: Create a dataset and assert DOI exists
-
-        ctd.CreateTestData.create() creates using the model and bypasses
-        plugin hooks - so we'll create using CKAN actions and then text the DOI exists
-
-        :return:
-        """
-        pass
+        doi_lib.publish_doi(self.package_dict['id'], **metadata_dict)
+    #
+    # def create_dataset(self):
+    #     """
+    #     TODO: Create a dataset and assert DOI exists
+    #
+    #     ctd.CreateTestData.create() creates using the model and bypasses
+    #     plugin hooks - so we'll create using CKAN actions and then text the DOI exists
+    #
+    #     :return:
+    #     """
+    #     pass
 
 
 
