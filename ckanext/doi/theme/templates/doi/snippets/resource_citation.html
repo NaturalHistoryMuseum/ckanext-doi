@@ -1,0 +1,30 @@
+{#
+Renders a citation for a resource
+#}
+
+{% extends "doi/snippets/package_citation.html" %}
+
+{% block citation %}
+    <section class="module additional-info">
+        <div class="module-content citation">
+            <h3>{{ _('Cite this as') }}</h3>
+
+
+                {% set site_title = h.get_site_title() %}
+                <p>
+                    {{ pkg_dict['author'] }} ({{ h.package_get_year(pkg_dict) }}). Dataset: {{ pkg_dict['title'] }}. Resource: {{ res['name'] }}.
+                    {% if site_title %}
+                        {{ site_title }}.
+                    {% endif %}
+                {% block citation_link %}
+                    {{ super() }}
+                {% endblock %}
+                </p>
+
+            {% block citation_status %}
+                {{ super() }}
+            {% endblock %}
+
+        </div>
+    </section>
+{% endblock %}

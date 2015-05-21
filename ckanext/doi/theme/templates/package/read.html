@@ -1,3 +1,12 @@
+{#
+
+As we have DOIs we need to keep the landing page
+
+Add DataCite DOI data to the additional_info section
+
+#}
+
+
 {% ckan_extends %}
 
 {% block package_resources %}
@@ -18,3 +27,9 @@
 
 {% endblock %}
 
+{% block package_additional_info %}
+    {% if pkg.doi %}
+        {% snippet "doi/snippets/package_citation.html", pkg_dict=pkg %}
+    {% endif %}
+    {{ super() }}
+{% endblock %}

@@ -1,0 +1,33 @@
+{#
+Renders a citation for a package
+#}
+
+{% block citation %}
+    <section class="additional-info">
+
+      <h3>{{ _('Cite this as') }}</h3>
+
+        <div class="citation">
+            {% set site_title = h.get_site_title() %}
+            <p>
+                {{ pkg_dict['author'] }} ({{ h.package_get_year(pkg_dict) }}). Dataset: {{ pkg_dict['title'] }}.
+                {% if site_title %}
+                    {{ site_title }}.
+                {% endif %}
+            {% block citation_link %}
+                <a href="http://dx.doi.org/{{ pkg_dict['doi'] }}" target="_blank">http://dx.doi.org/{{ pkg_dict['doi'] }}</a></p>
+            {% endblock %}
+            </p>
+
+        {% block citation_status %}
+            {% if not pkg_dict['doi_status'] %}
+              <span class="dataset-private label label-inverse" title="This DOI has not yet been published"><i class="icon-lock"></i> Private DOI</span>
+                <small><i class="icon-exclamation-sign"></i> <strong>This DOI is not yet resolvable.</strong><br />It is available for use in manuscripts, and will be published when the Dataset is made public.</small>
+            {% else %}
+                <p>Retrieved: {{ h.render_datetime(h.now(), date_format='%H:%M %d %b %Y') }} (GMT)</p>
+            {% endif %}
+        {% endblock %}
+        </div>
+    </section>
+
+{% endblock %}

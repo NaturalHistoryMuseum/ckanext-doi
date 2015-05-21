@@ -7,7 +7,7 @@ import ckan.logic as logic
 from ckan.lib import helpers as h
 from ckanext.doi.model import doi as doi_model
 from ckanext.doi.lib import get_doi, publish_doi, update_doi, create_unique_identifier, get_site_url, build_metadata, validate_metadata
-from ckanext.doi.helpers import package_get_year, now
+from ckanext.doi.helpers import package_get_year, now, get_site_title
 
 get_action = logic.get_action
 
@@ -109,10 +109,8 @@ class DOIPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
 
     ## IPackageController
     def after_show(self, context, pkg_dict):
-
         # Load the DOI ready to display
         doi = get_doi(pkg_dict['id'])
-
         if doi:
             pkg_dict['doi'] = doi.identifier
             pkg_dict['doi_status'] = True if doi.published else False
@@ -122,5 +120,6 @@ class DOIPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
     def get_helpers(self):
         return {
             'package_get_year': package_get_year,
-            'now': now
+            'now': now,
+            'get_site_title': get_site_title
         }
