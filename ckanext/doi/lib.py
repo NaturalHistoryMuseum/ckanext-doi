@@ -150,7 +150,9 @@ def build_metadata(pkg_dict, doi):
 
     # If we have tag_string use that to build subject
     if 'tag_string' in pkg_dict:
-        metadata_dict['subject'] = pkg_dict.get('tag_string', '').split(',').sort()
+        tags = pkg_dict.get('tag_string', '').split(',').sort()
+        if tags:
+            metadata_dict['subject'] = tags
     elif 'tags' in pkg_dict:
         # Otherwise use the tags list itself
         metadata_dict['subject'] = list(set([tag['name'] if isinstance(tag, dict) else tag for tag in pkg_dict['tags']])).sort()
