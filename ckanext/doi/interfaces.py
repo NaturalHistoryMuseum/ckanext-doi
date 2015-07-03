@@ -2,7 +2,7 @@ import ckan.plugins.interfaces as interfaces
 
 class IDoi(interfaces.Interface):
     """
-    Hook into contact form
+    Hook into IDoi
     """
     def build_metadata(self, pkg_dict, metadata_dict):
         """
@@ -13,3 +13,12 @@ class IDoi(interfaces.Interface):
         @return: metadata_dict
         """
         return metadata_dict
+
+    def metadata_to_xml(self, xml_dict, metadata):
+        """
+        Plugin interface for converting metadata into XML dict
+
+        @param xml_dict: XML dict to pass to datacite
+        @return: metadata_dict
+        """
+        return xml_dict

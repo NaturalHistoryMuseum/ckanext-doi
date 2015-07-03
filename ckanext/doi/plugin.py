@@ -91,7 +91,6 @@ class DOIPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
                 # We end up sending loads of revisions to DataCite for minor edits
                 # Load the current version
                 orig_metadata_dict = build_metadata(orig_pkg_dict, doi)
-
                 # Check if the two dictionaries are the same
                 if cmp(orig_metadata_dict, metadata_dict) != 0:
                     # Not the same, so we want to update the metadata

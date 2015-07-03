@@ -13,6 +13,8 @@ from pylons import config
 from xmltodict import unparse
 from ckanext.doi.datacite import get_endpoint
 from logging import getLogger
+import ckan.plugins as p
+from ckanext.doi.interfaces import IDoi
 
 log = getLogger(__name__)
 
@@ -102,7 +104,7 @@ class MetadataDataCiteAPI(DataCiteAPI):
         language = kwargs.get('language', 'eng')
 
         # Create basic metadata with mandatory metadata properties
-        metadata = {
+        xml_dict = {
             'resource': {
                 '@xmlns': 'http://datacite.org/schema/kernel-3',
                 '@xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
@@ -121,12 +123,12 @@ class MetadataDataCiteAPI(DataCiteAPI):
 
         # Add subject (if it exists)
         if subject:
-            metadata['resource']['subjects'] = {
+            xml_dict['resource']['subjects'] = {
                 'subject': [c for c in _ensure_list(subject)]
             }
 
         if description:
-            metadata['resource']['descriptions'] = {
+            xml_dict['resource']['descriptions'] = {
                 'description': {
                     '@descriptionType': 'Abstract',
                     '#text': description
@@ -134,47 +136,50 @@ class MetadataDataCiteAPI(DataCiteAPI):
             }
 
         if size:
-            metadata['resource']['sizes'] = {
+            xml_dict['resource']['sizes'] = {
                 'size': size
             }
 
         if format:
-            metadata['resource']['formats'] = {
+            xml_dict['resource']['formats'] = {
                 'format': format
             }
 
         if version:
-            metadata['resource']['version'] = version
+            xml_dict['resource']['version'] = version
 
         if rights:
-            metadata['resource']['rightsList'] = {
+            xml_dict['resource']['rightsList'] = {
                 'rights': rights
             }
 
         if resource_type:
-            metadata['resource']['resourceType'] = {
+            xml_dict['resource']['resourceType'] = {
                 '@resourceTypeGeneral': 'Dataset',
                 '#text': resource_type
             }
 
         if language:
-            metadata['resource']['language'] = language
+            xml_dict['resource']['language'] = language
 
         if geo_point:
-            metadata['resource']['geoLocations'] = {
+            xml_dict['resource']['geoLocations'] = {
                 'geoLocation': {
                     'geoLocationPoint': geo_point
                 }
             }
 
         if geo_box:
-            metadata['resource']['geoLocations'] = {
+            xml_dict['resource']['geoLocations'] = {
                 'geoLocation': {
                     'geoLocationBox': geo_box
                 }
             }
 
-        return unparse(metadata, pretty=True, full_document=False)
+        for plugin in p.PluginImplementations(IDoi):
+            xml_dict = plugin.metadata_to_xml(xml_dict, kwargs)
+
+        return unparse(xml_dict, pretty=True, full_document=False)
 
     def upsert(self, identifier, title, creator, publisher, publisher_year, **kwargs):
         """
