@@ -175,10 +175,8 @@ class MetadataDataCiteAPI(DataCiteAPI):
                     'geoLocationBox': geo_box
                 }
             }
-
         for plugin in p.PluginImplementations(IDoi):
             xml_dict = plugin.metadata_to_xml(xml_dict, kwargs)
-
         return unparse(xml_dict, pretty=True, full_document=False)
 
     def upsert(self, identifier, title, creator, publisher, publisher_year, **kwargs):
