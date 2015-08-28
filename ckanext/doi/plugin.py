@@ -5,6 +5,7 @@ from logging import getLogger
 import ckan.plugins as p
 import ckan.logic as logic
 from ckan.lib import helpers as h
+from ckan import model
 from ckanext.doi.model import doi as doi_model
 from ckanext.doi.lib import get_doi, publish_doi, update_doi, create_unique_identifier, get_site_url, build_metadata, validate_metadata
 from ckanext.doi.helpers import package_get_year, now, get_site_title
@@ -28,7 +29,8 @@ class DOIPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
         Called at the end of CKAN setup.
         Create DOI table
         """
-        doi_model.doi_table.create(checkfirst=True)
+        if model.package_table.exists():
+            doi_model.doi_table.create(checkfirst=True)
 
     ## IConfigurer
     def update_config(self, config):
