@@ -11,7 +11,7 @@ import requests
 from requests import ConnectionError
 from pylons import config
 from xmltodict import unparse
-from ckanext.doi.datacite import get_endpoint
+from ckanext.doi.datacite import get_endpoint, get_test_mode
 from logging import getLogger
 import ckan.plugins as p
 from ckanext.doi.interfaces import IDoi
@@ -44,6 +44,9 @@ class DataCiteAPI(object):
 
         # Add authorisation to request
         kwargs['auth'] = (account_name, account_password)
+
+        if get_test_mode():
+            kwargs['verify'] = False
 
         log.info("Calling %s:%s - %s", endpoint, method, kwargs)
 
