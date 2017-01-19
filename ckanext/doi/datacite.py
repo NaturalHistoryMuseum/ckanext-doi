@@ -11,7 +11,7 @@ from paste.deploy.converters import asbool
 TEST_PREFIX = '10.5072'
 
 ENDPOINT = 'https://mds.datacite.org'
-TEST_ENDPOINT = 'https://test.datacite.org/mds'
+TEST_ENDPOINT = 'https://mds.test.datacite.org'
 
 
 def get_test_mode():
