@@ -14,6 +14,7 @@ get_action = logic.get_action
 
 log = getLogger(__name__)
 
+
 class DOIPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
     """
     CKAN DOI Extension
@@ -73,8 +74,7 @@ class DOIPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
             doi = get_doi(package_id)
 
             # If we don't have a DOI, create one
-            # This could happen if the DOI module is enabled after a dataset has been creates
-
+            # This could happen if the DOI module is enabled after a dataset has been created
             if not doi:
                 doi = create_unique_identifier(package_id)
 
@@ -99,7 +99,7 @@ class DOIPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
                     update_doi(package_id, **metadata_dict)
                     h.flash_success('DataCite DOI metadata updated')
 
-                # TODO: If editing a dataset older than 5 days, create DOI revision
+                    # TODO: If editing a dataset older than 5 days, create DOI revision
 
             # New DOI - publish to datacite
             else:
@@ -108,7 +108,7 @@ class DOIPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
 
         return pkg_dict
 
-    ## IPackageController
+    # IPackageController
     def after_show(self, context, pkg_dict):
         # Load the DOI ready to display
         doi = get_doi(pkg_dict['id'])
