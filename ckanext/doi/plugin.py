@@ -1,6 +1,7 @@
 """
 CKAN DOI Plugin
 """
+from pylons import config
 from logging import getLogger
 import ckan.plugins as p
 import ckan.logic as logic
@@ -116,6 +117,8 @@ class DOIPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
             pkg_dict['doi'] = doi.identifier
             pkg_dict['doi_status'] = True if doi.published else False
             pkg_dict['domain'] = get_site_url().replace('http://', '')
+            pkg_dict['doi_date_published'] = doi.published
+            pkg_dict['doi_publisher'] = config.get("ckanext.doi.publisher")
 
     # ITemplateHelpers
     def get_helpers(self):

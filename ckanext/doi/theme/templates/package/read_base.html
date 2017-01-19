@@ -1,0 +1,12 @@
+{% ckan_extends %}
+
+{%- block meta -%}
+    {{ super() }}
+    {% if pkg['doi_status'] %}
+    <meta name="citation_doi" content="doi:{{ pkg['doi'] }}" />
+    <meta name="citation_title" content="{{ pkg['title'] }}" />
+    <meta name="citation_author" content="{{ pkg['author'] }}" />
+    <meta name="citation_online_date" content="{{ h.render_datetime(pkg['doi_date_published'], date_format='%Y-%M-%d') }}" />
+    <meta name="citation_publisher" content="{{ pkg['doi_publisher'] }}" />
+    {% endif %}
+{%- endblock -%}
