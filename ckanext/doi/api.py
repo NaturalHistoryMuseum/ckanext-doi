@@ -251,7 +251,7 @@ class DOIDataCiteAPI(DataCiteAPI):
 
 class MediaDataCiteAPI(DataCiteAPI):
     """
-    Calls to DataCite Metadata API
+    Calls to DataCite Media API
     """
     pass
 
