@@ -49,7 +49,6 @@ class DOIPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
         @param pkg_dict:
         @return:
         """
-        return
         create_unique_identifier(pkg_dict['id'])
 
     ## IPackageController
@@ -61,9 +60,6 @@ class DOIPlugin(p.SingletonPlugin, p.toolkit.DefaultDatasetForm):
         @param pkg_dict:
         @return: pkg_dict
         """
-        # FIXME: DOI Test service down!!
-        return
-
         # Is this active and public? If so we need to make sure we have an active DOI
         if pkg_dict.get('state', 'active') == 'active' and not pkg_dict.get('private', False):
 
