@@ -50,10 +50,19 @@ class DataCiteAPI(object):
 
         log.info("Calling %s:%s - %s", endpoint, method, kwargs)
 
-        r = getattr(requests, method)(endpoint, **kwargs)
-        r.raise_for_status()
-        # Return the result
-        return r
+        try:
+            r = getattr(requests, method)(endpoint, **kwargs)
+            r.raise_for_status()
+            assert r.status_code == 201, 'Operation failed ERROR CODE: %s' % r.status_code
+        except ConnectionError, e:
+            log.error('Creating DOI Failed - %s', e)
+            raise
+        except AssertionError:
+            log.error('Creating DOI Failed - error code %s', r.status_code)
+            log.error('Creating DOI Failed - error %s', r.content)
+            raise
+        else:
+            return r
 
 
 class MetadataDataCiteAPI(DataCiteAPI):
@@ -191,7 +200,6 @@ class MetadataDataCiteAPI(DataCiteAPI):
         """
         xml = self.metadata_to_xml(identifier, title, creator, publisher, publisher_year, **kwargs)
         r = self._call(method='post', data=xml, headers={'Content-Type': 'application/xml'})
-        assert r.status_code == 201, 'Operation failed ERROR CODE: %s' % r.status_code
         return r
 
     def delete(self, doi):
