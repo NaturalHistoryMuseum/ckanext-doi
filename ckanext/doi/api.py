@@ -8,7 +8,7 @@ Copyright (c) 2013 'bens3'. All rights reserved.
 import os
 import abc
 import requests
-from requests import ConnectionError
+from requests import ConnectionError, HTTPError
 from pylons import config
 from xmltodict import unparse
 from ckanext.doi.datacite import get_endpoint, get_test_mode
@@ -56,6 +56,11 @@ class DataCiteAPI(object):
             assert r.status_code == 201, 'Operation failed ERROR CODE: %s' % r.status_code
         except ConnectionError, e:
             log.error('Creating DOI Failed - %s', e)
+            raise
+        except HTTPError, e:
+            log.error('Creating DOI Failed - %s', e)
+            log.error('Creating DOI Failed - error code %s', r.status_code)
+            log.error('Creating DOI Failed - error %s', r.content)
             raise
         except AssertionError:
             log.error('Creating DOI Failed - error code %s', r.status_code)
