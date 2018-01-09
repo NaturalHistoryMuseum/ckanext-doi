@@ -8,7 +8,7 @@ CKAN extension for assigning a digital object identifier (DOI) to datasets, usin
 
 When a new dataset is created it is assigned a new DOI. This DOI will be in the format:
  
-http://dx.doi.org/[prefix]/[random 7 digit integer]
+https://doi.org/[prefix]/[random 7 digit integer]
 
 If the new dataset is active and public, the DOI and metadata will be registered with DataCite.
  
