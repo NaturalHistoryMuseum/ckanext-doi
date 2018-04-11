@@ -1,31 +1,37 @@
+#!/usr/bin/env python
+# encoding: utf-8
+#
+# This file is part of ckanext-doi
+# Created by the Natural History Museum in London, UK
+
 from setuptools import setup, find_packages
 
-version = '0.2'
+version = u'0.2'
 
 setup(
-	name='ckanext-doi',
+	name=u'ckanext-doi',
 	version=version,
-	description='CKAN extension for assigning a DOI to datasets',
+	description=u'CKAN extension for assigning a DOI to datasets',
 	classifiers=[],
-	keywords='',
-	author='Ben Scott',
-	author_email='ben@benscott.co.uk',
-	url='',
-	license='',
-    packages=find_packages(exclude=['tests']),
-    namespace_packages=['ckanext', 'ckanext.doi'],
+	keywords=u'',
+	author=u'Ben Scott',
+	author_email=u'ben@benscott.co.uk',
+	url=u'',
+	license=u'',
+    packages=find_packages(exclude=[u'tests']),
+    namespace_packages=[u'ckanext', u'ckanext.doi'],
 	include_package_data=True,
 	zip_safe=False,
 	install_requires=[
-		'requests',
-		'xmltodict'
+		u'requests',
+		u'xmltodict'
 	],
 	entry_points=\
-	"""
+	u'''
     [ckan.plugins]
     	doi=ckanext.doi.plugin:DOIPlugin
 
     [paste.paster_command]
         doi=ckanext.doi.commands.doi:DOICommand
-	""",
+	''',
 )

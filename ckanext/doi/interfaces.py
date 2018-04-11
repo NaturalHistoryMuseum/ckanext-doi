@@ -1,24 +1,30 @@
+#!/usr/bin/env python
+# encoding: utf-8
+#
+# This file is part of ckanext-doi
+# Created by the Natural History Museum in London, UK
+
 import ckan.plugins.interfaces as interfaces
 
 class IDoi(interfaces.Interface):
-    """
-    Hook into IDoi
-    """
+    '''Hook into IDoi'''
     def build_metadata(self, pkg_dict, metadata_dict):
-        """
-        Plugin interface for building metadata dictionary,
+        '''Plugin interface for building metadata dictionary,
         This will be passed to DOI DataCite minting service
 
-        @param pkg_dict: package dictionary
-        @return: metadata_dict
-        """
+        :param pkg_dict: package dictionary
+        :param metadata_dict: 
+        :returns: metadata_dict
+
+        '''
         return metadata_dict
 
     def metadata_to_xml(self, xml_dict, metadata):
-        """
-        Plugin interface for converting metadata into XML dict
+        '''Plugin interface for converting metadata into XML dict
 
-        @param xml_dict: XML dict to pass to datacite
-        @return: metadata_dict
-        """
+        :param xml_dict: XML dict to pass to datacite
+        :param metadata: 
+        :returns: metadata_dict
+
+        '''
         return xml_dict
