@@ -6,20 +6,22 @@
 
 
 import logging
-from ckan.lib.cli import CkanCommand
+
+from ckanext.doi.datacite import get_prefix
 from ckanext.doi.model.doi import DOI
 from ckanext.doi.model.repo import Repository
-from ckanext.doi.config import TEST_PREFIX
+
 from ckan.model import Session, meta
+from ckan.plugins import toolkit
 
 log = logging.getLogger(__name__)
 
-class DOICommand(CkanCommand):
-    '''Delete all test DOIs
+
+class DOICommand(toolkit.CkanCommand):
+    '''DOI-related paster commands.
     
     paster doi delete-tests -c /etc/ckan/default/development.ini
     paster doi upgrade-db -c /etc/ckan/default/development.ini
-
 
     '''
     summary = __doc__.split(u'\n')[0]
@@ -46,16 +48,17 @@ class DOICommand(CkanCommand):
             print u'Command %s not recognized' % cmd
 
     def delete_tests(self):
-        ''' '''
+        '''Delete all test DOIs.'''
 
         print u'Deleting all test DOIs'
-        Session.query(DOI).filter(DOI.identifier.like(u'%' + TEST_PREFIX + u'%')).delete(synchronize_session=False)
+        Session.query(DOI).filter(
+            DOI.identifier.like(u'%' + get_prefix() + u'%')).delete(
+            synchronize_session=False)
         Session.commit()
 
     def upgrade_db(self):
-        '''Upgrade script for updating the DOI DB model
-        Based on CKANs db upgrade command
-
+        '''Upgrade script for updating the DOI DB model.
+        Based on CKANs db upgrade command.
 
         '''
         repo = Repository(meta.metadata, meta.Session)
