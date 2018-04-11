@@ -4,53 +4,47 @@
 # This file is part of ckanext-doi
 # Created by the Natural History Museum in London, UK
 
-import paste.fixture
 from logging import getLogger
-from pylons import config
-import nose
-from sqlalchemy import create_engine
 
-import ckan
-import ckan.tests as tests
-import ckan.plugins as p
-import ckan.plugins.toolkit as toolkit
-import ckan.lib.create_test_data as ctd
-import ckan.model as model
-import ckan.config.middleware as middleware
-from nose.tools import assert_equal, assert_true, assert_false, assert_in, assert_raises, assert_is_not_none, assert_is_none, assert_is_instance
+from nose.tools import (assert_equal, assert_is_instance, assert_is_none,
+                        assert_is_not_none)
+
+from ckan import model
+from ckan.lib.create_test_data import CreateTestData
+from ckan.plugins import toolkit
+from ckan.tests import helpers
 
 log = getLogger(__name__)
 
-class TestDOI(tests.WsgiAppCase):
-    '''Test creating DOIs
-    nosetests -s --ckan --with-pylons=/Users/bens3/Projects/NHM/DataPortal/etc/default/test-core.ini ckanext.doi
 
+class TestDOI(helpers.FunctionalTestBase):
+    '''Test creating DOIs
+    nosetests -s --ckan --with-pylons=/Users/bens3/Projects/NHM/DataPortal/etc/default
+    /test-core.ini ckanext.doi
 
     '''
 
     context = None
     engine = None
+    _load_plugins = [u'doi']
 
     @classmethod
     def setup_class(cls):
         '''Prepare the test'''
+        super(TestDOI, cls).setup_class()
 
-        # Setup a test app
-        wsgiapp = middleware.make_app(config[u'global_conf'], **config)
-        cls.app = paste.fixture.TestApp(wsgiapp)
+        #  We need to actually create a dataset as DOI has foreign key constraint to
+        # dataset table
+        CreateTestData.create()
 
-        # Load plugins
-        p.load(u'doi')
-
-        #  We need to actually create a dataset as DOI has foreign key constraint to dataset table
-        ctd.CreateTestData.create()
-
-        cls.context = {u'model': ckan.model,
-                       u'session': ckan.model.Session,
-                       u'user': ckan.model.User.get(u'testsysadmin').name}
+        cls.context = {
+            u'user': model.User.get(u'testsysadmin').name
+            }
 
         cls.package = model.Package.get(u'annakarenina')
-        cls.package_dict = toolkit.get_action(u'package_show')(cls.context, {u'id': cls.package.id})
+        cls.package_dict = toolkit.get_action(u'package_show')(cls.context, {
+            u'id': cls.package.id
+            })
 
         # Add the author field
         cls.package_dict[u'author'] = u'Ben'
@@ -58,17 +52,16 @@ class TestDOI(tests.WsgiAppCase):
     @classmethod
     def teardown_class(cls):
         '''Clean up'''
-        p.unload(u'doi')
-        model.repo.rebuild_db()
+        super(TestDOI, cls).teardown_class()
+        helpers.reset_db()
 
     def test_doi_config(self):
         '''Test we are receiving params from the config file
         :return:
 
-
         '''
-        account_name = config.get(u'ckanext.doi.account_name')
-        account_password = config.get(u'ckanext.doi.account_password')
+        account_name = toolkit.config.get(u'ckanext.doi.account_name')
+        account_password = toolkit.config.get(u'ckanext.doi.account_password')
         assert_is_not_none(account_name)
         assert_is_not_none(account_password)
 
@@ -76,7 +69,6 @@ class TestDOI(tests.WsgiAppCase):
         '''Test a DOI has been created with the package
         We won't have tried pushing to the DataCite service
         :return:
-
 
         '''
 
@@ -98,7 +90,6 @@ class TestDOI(tests.WsgiAppCase):
     def test_doi_metadata(self):
         '''Test the creation and validation of metadata
         :return:
-
 
         '''
 
@@ -136,21 +127,3 @@ class TestDOI(tests.WsgiAppCase):
         doi_lib.validate_metadata(metadata_dict)
 
         doi_lib.publish_doi(self.package_dict[u'id'], **metadata_dict)
-    #
-    # def create_dataset(self):
-    #     """
-    #     TODO: Create a dataset and assert DOI exists
-    #
-    #     ctd.CreateTestData.create() creates using the model and bypasses
-    #     plugin hooks - so we'll create using CKAN actions and then text the DOI exists
-    #
-    #     :return:
-    #     """
-    #     pass
-
-
-
-
-
-
-
