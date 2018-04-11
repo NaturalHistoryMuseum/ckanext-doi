@@ -16,13 +16,14 @@ def upgrade(migrate_engine):
         ALTER TABLE doi
             ADD COLUMN published timestamp without time zone;
     '''
-    )
+                           )
 
     # Copy original created date to the new published column
     migrate_engine.execute(u'''
         UPDATE doi SET published = created;
     '''
-    )
+                           )
+
 
 def downgrade(migrate_engine):
     '''
