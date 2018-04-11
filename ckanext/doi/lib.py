@@ -1,27 +1,26 @@
-
-#!/usr/bin/env python
+# !/usr/bin/env python
 # encoding: utf-8
 #
 # This file is part of ckanext-doi
 # Created by the Natural History Museum in London, UK
 
-import os
-import random
 import datetime
 import itertools
+import json
+import random
 from logging import getLogger
-from ckan.model import Session
-from pylons import config
-from requests.exceptions import HTTPError
-import ckan.model as model
-from ckan.lib import helpers as h
-import ckan.plugins as p
-from ckanext.doi.api import MetadataDataCiteAPI, DOIDataCiteAPI
-from ckanext.doi.model.doi import DOI
+
+import os
+from ckanext.doi.api import DOIDataCiteAPI, MetadataDataCiteAPI
 from ckanext.doi.datacite import get_prefix
-from ckanext.doi.interfaces import IDoi
 from ckanext.doi.exc import DOIMetadataException
 from ckanext.doi.helpers import package_get_year
+from ckanext.doi.interfaces import IDoi
+from ckanext.doi.model.doi import DOI
+from requests.exceptions import HTTPError
+
+from ckan.model import Package, Session
+from ckan.plugins import PluginImplementations, toolkit
 
 log = getLogger(__name__)
 
@@ -38,7 +37,8 @@ def create_unique_identifier(package_id):
 
     while True:
 
-        identifier = os.path.join(get_prefix(), u'{0:07}'.format(random.randint(1, 100000)))
+        identifier = os.path.join(get_prefix(),
+                                  u'{0:07}'.format(random.randint(1, 100000)))
 
         # Check this identifier doesn't exist in the table
         if not Session.query(DOI).filter(DOI.identifier == identifier).count():
@@ -60,7 +60,6 @@ def create_unique_identifier(package_id):
 
 
 def publish_doi(package_id, **kwargs):
-
     '''Publish a DOI to DataCite
     
     Need to create metadata first
@@ -88,7 +87,10 @@ def publish_doi(package_id, **kwargs):
     # If we have created the DOI, save it to the database
     if r.text == u'OK':
         # Update status for this package and identifier
-        num_affected = Session.query(DOI).filter_by(package_id=package_id, identifier=identifier).update({u'published': datetime.datetime.now()})
+        num_affected = Session.query(DOI).filter_by(package_id=package_id,
+                                                    identifier=identifier).update({
+            u'published': datetime.datetime.now()
+            })
         # Raise an error if update has failed - should never happen unless
         # DataCite and local db get out of sync - in which case requires investigating
         assert num_affected == 1, u'Updating local DOI failed'
@@ -115,7 +117,7 @@ def get_doi(package_id):
     :param package_id: 
 
     '''
-    doi = Session.query(DOI).filter(DOI.package_id==package_id).first()
+    doi = Session.query(DOI).filter(DOI.package_id == package_id).first()
     return doi
 
 
@@ -125,10 +127,10 @@ def get_site_url():
 
 
     '''
-    site_url = config.get(u'ckanext.doi.site_url')
+    site_url = toolkit.config.get(u'ckanext.doi.site_url')
 
     if not site_url:
-        site_url = config.get(u'ckan.site_url')
+        site_url = toolkit.config.get(u'ckan.site_url')
 
     return site_url.rstrip('/')
 
@@ -148,14 +150,15 @@ def build_metadata(pkg_dict, doi):
         u'identifier': doi.identifier,
         u'title': pkg_dict[u'title'],
         u'creator': pkg_dict[u'author'],
-        u'publisher': config.get(u'ckanext.doi.publisher'),
+        u'publisher': toolkit.config.get(u'ckanext.doi.publisher'),
         u'publisher_year': package_get_year(pkg_dict),
         u'description': pkg_dict[u'notes'],
-    }
+        }
 
     # Convert the format to comma delimited
     try:
-        # Filter out empty strings in the array (which is what we have if nothing is entered)
+        # Filter out empty strings in the array (which is what we have if nothing is
+        # entered)
         # We want to make sure all None values are removed so we can compare
         # the dict here, with one loaded via action.package_show which doesn't
         # return empty values
@@ -172,11 +175,13 @@ def build_metadata(pkg_dict, doi):
             metadata_dict[u'subject'] = tags
     elif u'tags' in pkg_dict:
         # Otherwise use the tags list itself
-        metadata_dict[u'subject'] = list(set([tag[u'name'] if isinstance(tag, dict) else tag for tag in pkg_dict[u'tags']])).sort()
+        metadata_dict[u'subject'] = list(set(
+            [tag[u'name'] if isinstance(tag, dict) else tag for tag in
+             pkg_dict[u'tags']])).sort()
 
     if pkg_dict[u'license_id'] != u'notspecified':
 
-        licenses = model.Package.get_license_options()
+        licenses = Package.get_license_options()
 
         for license_title, license_id in licenses:
             if license_id == pkg_dict[u'license_id']:
@@ -188,19 +193,20 @@ def build_metadata(pkg_dict, doi):
 
     # Try and get spatial
     if u'extras_spatial' in pkg_dict and pkg_dict[u'extras_spatial']:
-        geometry = h.json.loads(pkg_dict[u'extras_spatial'])
+        geometry = json.loads(pkg_dict[u'extras_spatial'])
 
         if geometry[u'type'] == u'Point':
             metadata_dict[u'geo_point'] = u'%s %s' % tuple(geometry[u'coordinates'])
         elif geometry[u'type'] == u'Polygon':
             # DataCite expects box coordinates, not geo pairs
             # So dedupe to get the box and join into a string
-            metadata_dict[u'geo_box'] = u' '.join([str(coord) for coord in list(set(itertools.chain.from_iterable(geometry[u'coordinates'][0])))])
+            metadata_dict[u'geo_box'] = u' '.join([str(coord) for coord in list(
+                set(itertools.chain.from_iterable(geometry[u'coordinates'][0])))])
 
     # Allow plugins to alter the datacite DOI metadata
     # So other CKAN instances can add their own custom fields - and we can
     # Add our data custom to NHM
-    for plugin in p.PluginImplementations(IDoi):
+    for plugin in PluginImplementations(IDoi):
         plugin.build_metadata(pkg_dict, metadata_dict)
 
     return metadata_dict

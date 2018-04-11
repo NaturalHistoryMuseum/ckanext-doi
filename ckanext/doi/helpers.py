@@ -1,13 +1,14 @@
-
-#!/usr/bin/env python
+# !/usr/bin/env python
 # encoding: utf-8
 #
 # This file is part of ckanext-doi
 # Created by the Natural History Museum in London, UK
 
-from pylons import config
 from datetime import datetime
+
 import dateutil.parser as parser
+
+from ckan.plugins import toolkit
 
 
 def package_get_year(pkg_dict):
@@ -29,7 +30,7 @@ def get_site_title():
     :returns: str site title
 
     '''
-    return config.get(u'ckanext.doi.site_title')
+    return toolkit.config.get(u'ckanext.doi.site_title')
 
 
 def now():

@@ -4,10 +4,12 @@
 # This file is part of ckanext-doi
 # Created by the Natural History Museum in London, UK
 
-import ckan.plugins.interfaces as interfaces
+from ckan.plugins import interfaces
+
 
 class IDoi(interfaces.Interface):
     '''Hook into IDoi'''
+
     def build_metadata(self, pkg_dict, metadata_dict):
         '''Plugin interface for building metadata dictionary,
         This will be passed to DOI DataCite minting service

@@ -1,12 +1,12 @@
-
-#!/usr/bin/env python
+# !/usr/bin/env python
 # encoding: utf-8
 #
 # This file is part of ckanext-doi
 # Created by the Natural History Museum in London, UK
 
-from pylons import config
 from paste.deploy.converters import asbool
+
+from ckan.plugins import toolkit
 
 TEST_PREFIX = u'10.5072'
 
@@ -16,7 +16,7 @@ TEST_ENDPOINT = u'https://mds.test.datacite.org'
 
 def get_test_mode():
     '''Get test mode as boolean'''
-    return asbool(config.get(u'ckanext.doi.test_mode', True))
+    return asbool(toolkit.config.get(u'ckanext.doi.test_mode', True))
 
 
 def get_prefix():
@@ -27,11 +27,10 @@ def get_prefix():
 
     '''
 
-    return TEST_PREFIX if get_test_mode() else config.get(u'ckanext.doi.prefix')
+    return TEST_PREFIX if get_test_mode() else toolkit.config.get(u'ckanext.doi.prefix')
 
 
 def get_endpoint():
-
     '''Get the DataCite endpoint
 
 

@@ -1,22 +1,23 @@
-
-#!/usr/bin/env python
+# !/usr/bin/env python
 # encoding: utf-8
 #
 # This file is part of ckanext-doi
 # Created by the Natural History Museum in London, UK
 
-import os
-import abc
-import requests
-from requests import ConnectionError, HTTPError
-from pylons import config
-from xmltodict import unparse
-from ckanext.doi.datacite import get_endpoint, get_test_mode
 from logging import getLogger
-import ckan.plugins as p
+
+import abc
+import os
+import requests
+from ckanext.doi.datacite import get_endpoint, get_test_mode
 from ckanext.doi.interfaces import IDoi
+from requests import ConnectionError, HTTPError
+from xmltodict import unparse
+
+from ckan.plugins import PluginImplementations, toolkit
 
 log = getLogger(__name__)
+
 
 class DataCiteAPI(object):
     ''' '''
@@ -33,8 +34,8 @@ class DataCiteAPI(object):
 
         '''
 
-        account_name = config.get(u'ckanext.doi.account_name')
-        account_password = config.get(u'ckanext.doi.account_password')
+        account_name = toolkit.config.get(u'ckanext.doi.account_name')
+        account_password = toolkit.config.get(u'ckanext.doi.account_password')
         endpoint = os.path.join(get_endpoint(), self.path)
 
         try:
@@ -60,7 +61,8 @@ class DataCiteAPI(object):
         try:
             r = getattr(requests, method)(endpoint, **kwargs)
             r.raise_for_status()
-            assert r.status_code == 201, u'Operation failed ERROR CODE: %s' % r.status_code
+            assert r.status_code == 201, u'Operation failed ERROR CODE: %s' % \
+                                         r.status_code
         except ConnectionError, e:
             log.error(u'Creating DOI Failed - %s', e)
             raise
@@ -84,7 +86,8 @@ class MetadataDataCiteAPI(DataCiteAPI):
     def get(self, doi):
         '''URI: https://datacite.org/mds/metadata/{doi} where {doi} is a specific DOI.
 
-        :param doi: return: The most recent version of metadata associated with a given DOI.
+        :param doi: return: The most recent version of metadata associated with a
+        given DOI.
         :returns: The most recent version of metadata associated with a given DOI.
 
         '''
@@ -96,9 +99,12 @@ class MetadataDataCiteAPI(DataCiteAPI):
 
         :param identifier: DOI
         :param title: A descriptive name for the resource
-        :param creator: The author or producer of the data. There may be multiple Creators, in which case they should be listed in order of priority
-        :param publisher: The data holder. This is usually the repository or data centre in which the data is stored
-        :param publisher_year: The year when the data was (or will be) made publicly available.
+        :param creator: The author or producer of the data. There may be multiple
+        Creators, in which case they should be listed in order of priority
+        :param publisher: The data holder. This is usually the repository or data
+        centre in which the data is stored
+        :param publisher_year: The year when the data was (or will be) made publicly
+        available.
         :param kwargs: optional metadata
         :param **kwargs: 
 
@@ -136,42 +142,50 @@ class MetadataDataCiteAPI(DataCiteAPI):
             u'resource': {
                 u'@xmlns': u'http://datacite.org/schema/kernel-3',
                 u'@xmlns:xsi': u'http://www.w3.org/2001/XMLSchema-instance',
-                u'@xsi:schemaLocation': u'http://datacite.org/schema/kernel-3 http://schema.datacite.org/meta/kernel-3/metadata.xsd',
-                u'identifier': {u'@identifierType': u'DOI', u'#text': identifier},
+                u'@xsi:schemaLocation': u'http://datacite.org/schema/kernel-3 '
+                                        u'http://schema.datacite.org/meta/kernel-3/metadata.xsd',
+                u'identifier': {
+                    u'@identifierType': u'DOI',
+                    u'#text': identifier
+                    },
                 u'titles': {
-                    u'title': {u'#text': title}
-                },
+                    u'title': {
+                        u'#text': title
+                        }
+                    },
                 u'creators': {
-                    u'creator': [{u'creatorName': c.encode(u'unicode-escape')} for c in _ensure_list(creator)],
-                },
+                    u'creator': [{
+                        u'creatorName': c.encode(u'unicode-escape')
+                        } for c in _ensure_list(creator)],
+                    },
                 u'publisher': publisher,
                 u'publicationYear': publisher_year,
+                }
             }
-        }
 
         # Add subject (if it exists)
         if subject:
             xml_dict[u'resource'][u'subjects'] = {
                 u'subject': [c for c in _ensure_list(subject)]
-            }
+                }
 
         if description:
             xml_dict[u'resource'][u'descriptions'] = {
                 u'description': {
                     u'@descriptionType': u'Abstract',
                     u'#text': description
+                    }
                 }
-            }
 
         if size:
             xml_dict[u'resource'][u'sizes'] = {
                 u'size': size
-            }
+                }
 
         if format:
             xml_dict[u'resource'][u'formats'] = {
                 u'format': format
-            }
+                }
 
         if version:
             xml_dict[u'resource'][u'version'] = version
@@ -179,13 +193,13 @@ class MetadataDataCiteAPI(DataCiteAPI):
         if rights:
             xml_dict[u'resource'][u'rightsList'] = {
                 u'rights': rights
-            }
+                }
 
         if resource_type:
             xml_dict[u'resource'][u'resourceType'] = {
                 u'@resourceTypeGeneral': u'Dataset',
                 u'#text': resource_type
-            }
+                }
 
         if language:
             xml_dict[u'resource'][u'language'] = language
@@ -194,22 +208,23 @@ class MetadataDataCiteAPI(DataCiteAPI):
             xml_dict[u'resource'][u'geoLocations'] = {
                 u'geoLocation': {
                     u'geoLocationPoint': geo_point
+                    }
                 }
-            }
 
         if geo_box:
             xml_dict[u'resource'][u'geoLocations'] = {
                 u'geoLocation': {
                     u'geoLocationBox': geo_box
+                    }
                 }
-            }
-        for plugin in p.PluginImplementations(IDoi):
+        for plugin in PluginImplementations(IDoi):
             xml_dict = plugin.metadata_to_xml(xml_dict, kwargs)
         return unparse(xml_dict, pretty=True, full_document=False)
 
     def upsert(self, identifier, title, creator, publisher, publisher_year, **kwargs):
         '''URI: https://test.datacite.org/mds/metadata
-        This request stores new version of metadata. The request body must contain valid XML.
+        This request stores new version of metadata. The request body must contain
+        valid XML.
 
         :param metadata_dict: dict to convert to xml
         :param identifier: 
@@ -221,12 +236,16 @@ class MetadataDataCiteAPI(DataCiteAPI):
         :returns: URL of the newly stored metadata
 
         '''
-        xml = self.metadata_to_xml(identifier, title, creator, publisher, publisher_year, **kwargs)
-        r = self._call(method=u'post', data=xml, headers={u'Content-Type': u'application/xml'})
+        xml = self.metadata_to_xml(identifier, title, creator, publisher, publisher_year,
+                                   **kwargs)
+        r = self._call(method=u'post', data=xml, headers={
+            u'Content-Type': u'application/xml'
+            })
         return r
 
     def delete(self, doi):
-        '''URI: https://test.datacite.org/mds/metadata/{doi} where {doi} is a specific DOI.
+        '''URI: https://test.datacite.org/mds/metadata/{doi} where {doi} is a specific
+        DOI.
         This request marks a dataset as 'inactive'.
 
         :param doi: DOI
@@ -256,14 +275,18 @@ class DOIDataCiteAPI(DataCiteAPI):
         URI: https://datacite.org/mds/doi
 
 
-        :returns: This request returns a list of all DOIs for the requesting data centre. There is no guaranteed order.
+        :returns: This request returns a list of all DOIs for the requesting data
+        centre. There is no guaranteed order.
 
         '''
         return self._call()
 
     def upsert(self, doi, url):
         '''URI: https://datacite.org/mds/doi
-        POST will mint new DOI if specified DOI doesn't exist. This method will attempt to update URL if you specify existing DOI. Standard domains and quota restrictions check will be performed. A Datacentre's doiQuotaUsed will be increased by 1. A new record in Datasets will be created.
+        POST will mint new DOI if specified DOI doesn't exist. This method will
+        attempt to update URL if you specify existing DOI. Standard domains and quota
+        restrictions check will be performed. A Datacentre's doiQuotaUsed will be
+        increased by 1. A new record in Datasets will be created.
 
         :param doi: doi to mint
         :param url: url doi points to
@@ -274,12 +297,14 @@ class DOIDataCiteAPI(DataCiteAPI):
             data={
                 u'doi': doi,
                 u'url': url
-            },
+                },
             method=u'post',
-            headers={u'Content-Type': u'application/x-www-form-urlencoded'}
-        )
+            headers={
+                u'Content-Type': u'application/x-www-form-urlencoded'
+                }
+            )
+
 
 class MediaDataCiteAPI(DataCiteAPI):
     '''Calls to DataCite Media API'''
     pass
-
