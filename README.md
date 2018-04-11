@@ -1,6 +1,8 @@
 ckanext-doi
 ===========
 
+[![Travis branch](https://img.shields.io/travis/NaturalHistoryMuseum/ckanext-doi/master.svg?style=flat-square)](https://travis-ci.org/NaturalHistoryMuseum/ckanext-doi) [![Coveralls github branch](https://img.shields.io/coveralls/github/NaturalHistoryMuseum/ckanext-doi/master.svg?style=flat-square)](https://coveralls.io/github/NaturalHistoryMuseum/ckanext-doi)
+
 Overview
 --------
 
