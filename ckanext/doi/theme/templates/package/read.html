@@ -12,7 +12,7 @@ Add DataCite DOI data to the additional_info section
 {% block package_resources %}
 
     {% if pkg.state == 'deleted' %}
-        <p class="empty"><i class="icon-warning-sign"></i> This dataset has been deleted.</p>
+        <p class="empty"><i class="fa fa-warning-sign"></i> This dataset has been deleted.</p>
     {% else %}
         {% snippet "package/snippets/resources_list.html", pkg=pkg, resources=pkg.resources %}
     {% endif %}
