@@ -238,9 +238,12 @@ class MetadataDataCiteAPI(DataCiteAPI):
         '''
         xml = self.metadata_to_xml(identifier, title, creator, publisher, publisher_year,
                                    **kwargs)
-        r = self._call(method=u'post', data=xml, headers={
-            u'Content-Type': u'application/xml'
-            })
+        try:
+            r = self._call(method=u'post', data=xml, headers={
+                u'Content-Type': u'application/xml'
+                })
+        except HTTPError as e:
+            r = {u'success': False, u'error': {u'message': e.message, u'__type': e.response.status_code}}
         return r
 
     def delete(self, doi):
