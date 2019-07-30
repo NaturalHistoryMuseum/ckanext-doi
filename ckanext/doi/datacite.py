@@ -20,14 +20,19 @@ def get_test_mode():
 
 
 def get_prefix():
-    '''Get the prefix to use for DOIs
+    """
+    Get the prefix to use for DOIs
+    @return: config prefix setting
+    """
+    prefix = config.get("ckanext.doi.prefix")
 
+    if prefix == None:
+      raise TypeError('You must set the ckanext.doi.prefix config value')
 
-    :returns: test prefix if we're in test mode, otherwise config prefix setting
+    if prefix == TEST_PREFIX:
+      raise ValueError('The test prefix ' + TEST_PREFIX + ' has been retired, use a prefix defined in your datacite test account')
 
-    '''
-
-    return TEST_PREFIX if get_test_mode() else toolkit.config.get(u'ckanext.doi.prefix')
+    return prefix
 
 
 def get_endpoint():
