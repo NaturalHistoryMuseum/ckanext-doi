@@ -10,6 +10,7 @@ import ckanext.doi.lib as doi_lib
 import mock
 import nose
 from ckantest.factories.data import DataConstants
+from ckantest.helpers.mocking import Response
 from ckantest.models import TestBase
 
 from ckan.plugins import toolkit
@@ -53,7 +54,8 @@ class TestDOI(TestBase):
         # This will only be an issue if another plugin has removed a mandatory field
         doi_lib.validate_metadata(metadata_dict)
 
-    def test_publish_to_datacite(self):
+    @mock.patch('ckanext.doi.api.requests.put', return_value=Response(status_code=201))
+    def test_publish_to_datacite(self, mock_request):
         doi = doi_lib.get_or_create_doi(self.package_dict[u'id'])
         metadata_dict = doi_lib.build_metadata(self.package_dict, doi)
         doi_lib.validate_metadata(metadata_dict)
