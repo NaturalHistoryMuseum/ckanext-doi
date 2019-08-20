@@ -24,7 +24,7 @@ def get_prefix():
     Get the prefix to use for DOIs
     @return: config prefix setting
     """
-    prefix = config.get("ckanext.doi.prefix")
+    prefix = toolkit.config.get("ckanext.doi.prefix")
 
     if prefix == None:
       raise TypeError('You must set the ckanext.doi.prefix config value')

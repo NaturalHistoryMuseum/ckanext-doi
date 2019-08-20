@@ -25,23 +25,23 @@ from ckan.plugins import PluginImplementations, toolkit
 log = getLogger(__name__)
 
 
-def create_unique_identifier(package_id):
-    '''Create a unique identifier, using the prefix and a random number: 10.5072/0044634
-    Checks the random number doesn't exist in the table or the datacite repository
-    All unique identifiers are created with
+def get_or_create_doi(package_id):
+    '''Create or retrieve the unique identifier for this package_id.
 
-    :param package_id: 
+    :param package_id:
 
     '''
     datacite_api = DOIDataCiteAPI()
 
-    while True:
+    doi = get_doi(package_id)
+    if doi is None:
+        while True:
+            identifier = os.path.join(get_prefix(),
+                                      u'{0:07}'.format(random.randint(1, 100000)))
 
-        identifier = os.path.join(get_prefix(),
-                                  u'{0:07}'.format(random.randint(1, 100000)))
-
-        # Check this identifier doesn't exist in the table
-        if not Session.query(DOI).filter(DOI.identifier == identifier).count():
+            # Check this identifier doesn't exist in the table
+            if Session.query(DOI).filter(DOI.identifier == identifier).count():
+                continue
 
             # And check against the datacite service
             try:
@@ -52,16 +52,17 @@ def create_unique_identifier(package_id):
                 if datacite_doi.text:
                     continue
 
-        doi = DOI(package_id=package_id, identifier=identifier)
-        Session.add(doi)
-        Session.commit()
+            doi = DOI(package_id=package_id, identifier=identifier)
+            Session.add(doi)
+            Session.commit()
+            break
 
-        return doi
+    return doi
 
 
 def publish_doi(package_id, **kwargs):
     '''Publish a DOI to DataCite
-    
+
     Need to create metadata first
     And then create DOI => URI association
     See MetadataDataCiteAPI.metadata_to_xml for param information
@@ -69,7 +70,7 @@ def publish_doi(package_id, **kwargs):
     :param package_id: param kwargs contains metadata:
     :param title: param creator:
     :param publisher: param publisher_year:
-    :param **kwargs: 
+    :param **kwargs:
     :returns: request response
 
     '''
@@ -101,8 +102,8 @@ def publish_doi(package_id, **kwargs):
 def update_doi(package_id, **kwargs):
     '''
 
-    :param package_id: 
-    :param **kwargs: 
+    :param package_id:
+    :param **kwargs:
 
     '''
     doi = get_doi(package_id)
@@ -114,7 +115,7 @@ def update_doi(package_id, **kwargs):
 def get_doi(package_id):
     '''
 
-    :param package_id: 
+    :param package_id:
 
     '''
     doi = Session.query(DOI).filter(DOI.package_id == package_id).first()
@@ -138,8 +139,8 @@ def get_site_url():
 def build_metadata(pkg_dict, doi):
     '''
 
-    :param pkg_dict: 
-    :param doi: 
+    :param pkg_dict:
+    :param doi:
 
     '''
 
@@ -179,7 +180,7 @@ def build_metadata(pkg_dict, doi):
             [tag[u'name'] if isinstance(tag, dict) else tag for tag in
              pkg_dict[u'tags']])).sort()
 
-    if pkg_dict[u'license_id'] != u'notspecified':
+    if pkg_dict.get(u'license_id', u'notspecified') != u'notspecified':
 
         licenses = Package.get_license_options()
 
@@ -215,7 +216,7 @@ def build_metadata(pkg_dict, doi):
 def validate_metadata(metadata_dict):
     '''Validate the metadata - loop through mandatory fields and check they are populated
 
-    :param metadata_dict: 
+    :param metadata_dict:
 
     '''
 

@@ -30,7 +30,7 @@ class DataCiteAPI(object):
     def _call(self, **kwargs):
         '''
 
-        :param **kwargs: 
+        :param **kwargs:
 
         '''
 
@@ -106,7 +106,7 @@ class MetadataDataCiteAPI(DataCiteAPI):
         :param publisher_year: The year when the data was (or will be) made publicly
         available.
         :param kwargs: optional metadata
-        :param **kwargs: 
+        :param **kwargs:
 
         '''
 
@@ -115,7 +115,7 @@ class MetadataDataCiteAPI(DataCiteAPI):
         def _ensure_list(var):
             '''
 
-            :param var: 
+            :param var:
 
             '''
             return var if isinstance(var, list) else [var]
@@ -227,21 +227,21 @@ class MetadataDataCiteAPI(DataCiteAPI):
         valid XML.
 
         :param metadata_dict: dict to convert to xml
-        :param identifier: 
-        :param title: 
-        :param creator: 
-        :param publisher: 
-        :param publisher_year: 
-        :param **kwargs: 
+        :param identifier:
+        :param title:
+        :param creator:
+        :param publisher:
+        :param publisher_year:
+        :param **kwargs:
         :returns: URL of the newly stored metadata
 
         '''
         xml = self.metadata_to_xml(identifier, title, creator, publisher, publisher_year,
                                    **kwargs)
         try:
-            r = self._call(method=u'post', data=xml, headers={
+            r = self._call(method=u'put', data=xml, headers={
                 u'Content-Type': u'application/xml'
-                })
+                }, path_extra=identifier)
         except HTTPError as e:
             r = {u'success': False, u'error': {u'message': e.message, u'__type': e.response.status_code}}
         return r
@@ -301,10 +301,11 @@ class DOIDataCiteAPI(DataCiteAPI):
                 u'doi': doi,
                 u'url': url
                 },
-            method=u'post',
+            method=u'put',
             headers={
                 u'Content-Type': u'application/x-www-form-urlencoded'
-                }
+                },
+            path_extra=doi
             )
 
 

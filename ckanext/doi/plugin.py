@@ -8,7 +8,7 @@ from datetime import datetime
 from logging import getLogger
 
 from ckanext.doi.helpers import get_site_title, now, package_get_year
-from ckanext.doi.lib import (build_metadata, create_unique_identifier, get_doi,
+from ckanext.doi.lib import (build_metadata, get_or_create_doi, get_doi,
                              get_site_url, publish_doi, update_doi, validate_metadata)
 from ckanext.doi.model import doi as doi_model
 
@@ -30,7 +30,7 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
         '''Called at the end of CKAN setup.
         Create DOI table
 
-        :param config: 
+        :param config:
 
         '''
         if model.package_table.exists():
@@ -40,7 +40,7 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
     def update_config(self, config):
         '''
 
-        :param config: 
+        :param config:
 
         '''
         # Add templates
@@ -53,10 +53,10 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
         added so state = draft
 
         :param context: param pkg_dict:
-        :param pkg_dict: 
+        :param pkg_dict:
 
         '''
-        create_unique_identifier(pkg_dict[u'id'])
+        get_or_create_doi(pkg_dict[u'id'])
 
     ## IPackageController
     def after_update(self, context, pkg_dict):
@@ -65,7 +65,7 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
         network
 
         :param pkg_dict: return: pkg_dict
-        :param context: 
+        :param context:
         :returns: pkg_dict
 
         '''
@@ -91,7 +91,7 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
             # This could happen if the DOI module is enabled after a dataset has been
             # created
             if not doi:
-                doi = create_unique_identifier(package_id)
+                doi = get_or_create_doi(package_id)
 
             # Build the metadata dict to pass to DataCite service
             metadata_dict = build_metadata(pkg_dict, doi)
@@ -128,8 +128,8 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
     def after_show(self, context, pkg_dict):
         '''
 
-        :param context: 
-        :param pkg_dict: 
+        :param context:
+        :param pkg_dict:
 
         '''
         # Load the DOI ready to display
