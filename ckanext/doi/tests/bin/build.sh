@@ -35,6 +35,4 @@ pip install -r requirements.txt
 pip install -r dev_requirements.txt
 pip install -e .
 
-echo "ckanext.doi.account_name = $DATACITE_ACCOUNT_NAME
-ckanext.doi.account_password = $DATACITE_ACCOUNT_PASSWORD
-ckanext.doi.prefix = $DATACITE_PREFIX" >> $HERE/ckanext/doi/tests/bin/test.ini
+sed -i "/\[loggers\]/ { N; s/\[loggers\]\n/ckanext.doi.account_name = $DATACITE_ACCOUNT_NAME\nckanext.doi.account_password = $DATACITE_ACCOUNT_PASSWORD\nckanext.doi.prefix = $DATACITE_PREFIX\n\n&/ }" $HERE/ckanext/doi/tests/bin/test.ini
