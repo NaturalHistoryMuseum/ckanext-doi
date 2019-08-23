@@ -31,7 +31,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'requests==2.4.3',
+        'requests',
         'xmltodict==0.9.0',
         ],
     entry_points= \
