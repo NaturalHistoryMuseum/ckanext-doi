@@ -77,12 +77,14 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
 
             # Load the original package, so we can determine if user has changed any
             # fields
+            context.pop(u'schema')  # remove user-defined update schemas first
             orig_pkg_dict = toolkit.get_action(u'package_show')(context, {
                 u'id': package_id
                 })
 
-            # Metadata created isn't populated in pkg_dict - so copy from the original
-            pkg_dict[u'metadata_created'] = orig_pkg_dict[u'metadata_created']
+            # If metadata_created isn't populated in pkg_dict, copy from the original
+            if u'metadata_created' not in pkg_dict:
+                pkg_dict[u'metadata_created'] = orig_pkg_dict.get(u'metadata_created', u'')
 
             # Load the local DOI
             doi = get_doi(package_id)
