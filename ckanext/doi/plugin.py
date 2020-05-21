@@ -75,9 +75,9 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
 
             package_id = pkg_dict[u'id']
 
-            # Load the original package, so we can determine if user has changed any
-            # fields
-            context.pop(u'schema')  # remove user-defined update schemas first
+            # remove user-defined update schemas first (if needed)
+            context.pop(u'schema', None)
+            # Load the original package, so we can determine if user has changed any fields
             orig_pkg_dict = toolkit.get_action(u'package_show')(context, {
                 u'id': package_id
                 })
