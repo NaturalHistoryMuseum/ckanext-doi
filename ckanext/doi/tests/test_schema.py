@@ -21,7 +21,7 @@ class Resolver(etree.Resolver):
 
 class TestSchema(TestBase):
     plugins = [u'doi']
-    base_url = u'https://schema.datacite.org/meta/kernel-3/'
+    base_url = u'https://schema.datacite.org/meta/kernel-4.3/'
 
     @classmethod
     def setup_class(cls):

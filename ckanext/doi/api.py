@@ -140,10 +140,10 @@ class MetadataDataCiteAPI(DataCiteAPI):
         # Create basic metadata with mandatory metadata properties
         xml_dict = {
             u'resource': {
-                u'@xmlns': u'http://datacite.org/schema/kernel-3',
+                u'@xmlns': u'http://datacite.org/schema/kernel-4',
                 u'@xmlns:xsi': u'http://www.w3.org/2001/XMLSchema-instance',
-                u'@xsi:schemaLocation': u'http://datacite.org/schema/kernel-3 '
-                                        u'http://schema.datacite.org/meta/kernel-3/metadata.xsd',
+                u'@xsi:schemaLocation': u'http://datacite.org/schema/kernel-4 '
+                                        u'http://schema.datacite.org/meta/kernel-4.3/metadata.xsd',
                 u'identifier': {
                     u'@identifierType': u'DOI',
                     u'#text': identifier
