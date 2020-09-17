@@ -125,11 +125,11 @@ class MetadataDataCiteAPI(DataCiteAPI):
 
         # Optional metadata properties
         subject = kwargs.get(u'subject')
-        description = kwargs.get(u'description').encode(u'unicode-escape')
         size = kwargs.get(u'size')
         format = kwargs.get(u'format')
         version = kwargs.get(u'version')
         rights = kwargs.get(u'rights')
+        description = kwargs.get(u'description').encode(u'unicode-escape')
         geo_point = kwargs.get(u'geo_point')
         geo_box = kwargs.get(u'geo_box')
 
@@ -148,34 +148,34 @@ class MetadataDataCiteAPI(DataCiteAPI):
                     u'@identifierType': u'DOI',
                     u'#text': identifier
                     },
-                u'titles': {
-                    u'title': {
-                        u'#text': title
-                        }
-                    },
                 u'creators': {
                     u'creator': [{
                         u'creatorName': c.encode(u'unicode-escape')
                         } for c in _ensure_list(creator)],
+                    },
+                u'titles': {
+                    u'title': {
+                        u'#text': title
+                        }
                     },
                 u'publisher': publisher,
                 u'publicationYear': publisher_year,
                 }
             }
 
-        # Add subject (if it exists)
+        if resource_type:
+            xml_dict[u'resource'][u'resourceType'] = {
+                u'@resourceTypeGeneral': u'Dataset',
+                u'#text': resource_type
+                }
+
         if subject:
             xml_dict[u'resource'][u'subjects'] = {
                 u'subject': [c for c in _ensure_list(subject)]
                 }
 
-        if description:
-            xml_dict[u'resource'][u'descriptions'] = {
-                u'description': {
-                    u'@descriptionType': u'Abstract',
-                    u'#text': description
-                    }
-                }
+        if language:
+            xml_dict[u'resource'][u'language'] = language
 
         if size:
             xml_dict[u'resource'][u'sizes'] = {
@@ -195,14 +195,13 @@ class MetadataDataCiteAPI(DataCiteAPI):
                 u'rights': rights
                 }
 
-        if resource_type:
-            xml_dict[u'resource'][u'resourceType'] = {
-                u'@resourceTypeGeneral': u'Dataset',
-                u'#text': resource_type
+        if description:
+            xml_dict[u'resource'][u'descriptions'] = {
+                u'description': {
+                    u'@descriptionType': u'Abstract',
+                    u'#text': description
+                    }
                 }
-
-        if language:
-            xml_dict[u'resource'][u'language'] = language
 
         if geo_point:
             xml_dict[u'resource'][u'geoLocations'] = {
@@ -217,8 +216,10 @@ class MetadataDataCiteAPI(DataCiteAPI):
                     u'geoLocationBox': geo_box
                     }
                 }
+
         for plugin in PluginImplementations(IDoi):
             xml_dict = plugin.metadata_to_xml(xml_dict, kwargs)
+
         return unparse(xml_dict, pretty=True, full_document=False)
 
     def upsert(self, identifier, title, creator, publisher, publisher_year, **kwargs):
