@@ -135,7 +135,7 @@ class MetadataDataCiteAPI(DataCiteAPI):
 
         # Optional metadata properties, with defaults
         resource_type = kwargs.get(u'resource_type', u'Dataset')
-        language = kwargs.get(u'language', u'eng')
+        language = kwargs.get(u'language', u'en')  # use ISO 639-1 language codes
 
         # Create basic metadata with mandatory metadata properties
         xml_dict = {
