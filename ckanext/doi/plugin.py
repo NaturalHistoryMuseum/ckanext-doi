@@ -7,10 +7,13 @@
 from datetime import datetime
 from logging import getLogger
 
-from ckanext.doi.helpers import get_site_title, now, package_get_year
-from ckanext.doi.lib import (build_metadata, get_doi, get_or_create_doi, get_site_url, publish_doi,
-                             update_doi, validate_metadata)
+from ckanext.doi.lib.helpers import get_site_title, package_get_year, get_site_url
+from ckanext.doi.lib.metadata import build_metadata_dict, build_xml_dict
+from ckanext.doi.lib.api import DataciteClient
+# from ckanext.doi.lib import (get_site_url, publish_doi,
+#                              update_doi, validate_metadata)
 from ckanext.doi.model import doi as doi_model
+from ckanext.doi.model.crud import DOIQuery
 
 from ckan import model
 from ckan.plugins import SingletonPlugin, implements, interfaces, toolkit
@@ -44,7 +47,7 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
         NB: This is called after creation of a dataset, before resources have been
         added, so state = draft.
         '''
-        get_or_create_doi(pkg_dict[u'id'])
+        DOIQuery.read_package(pkg_dict[u'id'], create_if_none=True)
 
     ## IPackageController
     def after_update(self, context, pkg_dict):
@@ -68,31 +71,28 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
 
             # Load or create the local DOI (package may not have a DOI if extension was loaded
             # after package creation)
-            doi = get_or_create_doi(package_id)
+            doi = DOIQuery.read_package(package_id, create_if_none=True)
 
             # Build the metadata dict to pass to DataCite service
-            metadata_dict = build_metadata(pkg_dict, doi)
+            metadata_dict = build_metadata_dict(pkg_dict)
+            xml_dict = build_xml_dict(metadata_dict)
 
-            # Perform some basic checks against the data - we require at the very least
-            # title and author fields - they're mandatory in the DataCite Schema
-            # This will only be an issue if another plugin has removed a mandatory field
-            validate_metadata(metadata_dict)
+            client = DataciteClient()
 
-            if doi.published:
+            if doi.published is None:
+                # metadata gets created before minting
+                client.set_metadata(doi.identifier, xml_dict)
+                client.mint_doi(doi.identifier, package_id)
+                toolkit.h.flash_success(u'DataCite DOI created')
+            else:
                 # Before updating, check if any of the metadata has been changed - otherwise we
                 # end up sending loads of revisions to DataCite for minor edits
-                orig_metadata_dict = build_metadata(orig_pkg_dict, doi)
+                orig_metadata_dict = build_metadata_dict(orig_pkg_dict, doi)
                 # Check if the two dictionaries are the same
                 if cmp(orig_metadata_dict, metadata_dict) != 0:
                     # Not the same, so we want to update the metadata
-                    update_doi(package_id, **metadata_dict)
+                    client.set_metadata(doi.identifier, xml_dict)
                     toolkit.h.flash_success(u'DataCite DOI metadata updated')
-
-                    # TODO: If editing a dataset older than 5 days, create DOI revision
-            else:
-                # New DOI - publish to datacite
-                publish_doi(package_id, **metadata_dict)
-                toolkit.h.flash_success(u'DataCite DOI created')
 
         return pkg_dict
 
@@ -100,7 +100,7 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
     def after_show(self, context, pkg_dict):
         '''Add the DOI details to the pkg_dict so it can be displayed.
         '''
-        doi = get_doi(pkg_dict[u'id'])
+        doi = DOIQuery.read_package(pkg_dict[u'id'])
         if doi:
             pkg_dict[u'doi'] = doi.identifier
             pkg_dict[u'doi_status'] = True if doi.published else False
@@ -114,6 +114,6 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
     def get_helpers(self):
         return {
             u'package_get_year': package_get_year,
-            u'now': now,
+            u'now': datetime.now,
             u'get_site_title': get_site_title
         }
