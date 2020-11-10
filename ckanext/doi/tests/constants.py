@@ -114,3 +114,28 @@ METADATA_DICT = {
         u'full_name': u'Author, Test'
     }]
 }
+
+# minimal example from https://datacite.readthedocs.io/en/latest
+XML_DICT = {
+    'identifier': {
+        'identifierType': 'DOI',
+        'identifier': '10.4124/abcd1234',
+    },
+    'creators': [
+        {
+            'name': 'Smith, John'
+        },
+    ],
+    'titles': [
+        {
+            'title': 'Minimal Test Case',
+        }
+    ],
+    'publisher': 'Invenio Software',
+    'publicationYear': '2015',
+    'types': {
+        'resourceType': 'Dataset',
+        'resourceTypeGeneral': 'Dataset'
+    },
+    'schemaVersion': 'http://datacite.org/schema/kernel-4',
+}

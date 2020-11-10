@@ -10,20 +10,28 @@ from ckantest.factories.data import DataConstants
 from ckantest.helpers.mocking import Response
 from ckantest.models import TestBase
 from ckanext.doi.lib.api import DataciteClient
-
+import constants
+from datacite.errors import DataCiteError
 
 class TestAPI(TestBase):
+    plugins = [u'doi']
+    persist = {
+        u'ckanext.doi.debug': True
+    }
 
     def test_generate_new_doi(self):
         api = DataciteClient()
         doi = api.generate_doi()
-        nose.tools.assert_is_instance(doi, str)
+        nose.tools.assert_is_instance(doi, (str, unicode))
 
     def test_mint_new_doi(self):
-        pass
-
-    def test_update_existing_doi(self):
-        pass
+        api = DataciteClient()
+        doi = constants.XML_DICT[u'identifier'][u'identifier']
+        pkg_id = u'abcd1234'
+        with nose.tools.assert_raises(DataCiteError):
+            api.mint_doi(doi, pkg_id)
+        api.set_metadata(doi, constants.XML_DICT)
+        api.mint_doi(doi, pkg_id)
 
     def test_datacite_authentication(self):
         api = DataciteClient()

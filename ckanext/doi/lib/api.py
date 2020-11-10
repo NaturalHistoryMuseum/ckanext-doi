@@ -116,8 +116,9 @@ class DataciteClient(object):
         site = toolkit.config.get(u'ckan.site_url')
         if site[-1] != u'/':
             site += u'/'
+        permalink = site + u'dataset/' + package_id
         # mint the DOI
-        self.client.doi_post(doi, site + u'dataset/' + package_id)
+        self.client.doi_post(doi, permalink)
 
     def set_metadata(self, doi, xml_dict):
         '''
