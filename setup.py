@@ -33,7 +33,7 @@ setup(
     install_requires=[
         'requests',
         'xmltodict==0.9.0',
-        'git+https://github.com/inveniosoftware/datacite.git'  # get it from github because pypi does not have schema 4.2
+        'datacite==1.0.1'
         ],
     entry_points= \
         u'''

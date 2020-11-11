@@ -2,3 +2,5 @@
 .
 
 # dev overrides/additional libraries
+# schema42 not released on pypi, so get datacite lib from github (version number is the same):
+-e git+https://github.com/inveniosoftware/datacite.git
