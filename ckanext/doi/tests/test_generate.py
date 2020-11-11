@@ -6,11 +6,12 @@
 
 import mock
 import nose
-from ckanext.doi.lib.metadata import build_metadata_dict, MetadataException, build_xml_dict
-import constants
+import pkg_resources
+from ckanext.doi.lib.metadata import build_metadata_dict, build_xml_dict
 from ckantest.models import TestBase
 from datacite.jsonutils import validator_factory
-import pkg_resources
+
+import constants
 
 
 class TestGenerate(TestBase):

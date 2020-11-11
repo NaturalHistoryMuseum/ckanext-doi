@@ -4,14 +4,13 @@
 # This file is part of ckanext-doi
 # Created by the Natural History Museum in London, UK
 
-import mock
 import nose
-from ckantest.factories.data import DataConstants
-from ckantest.helpers.mocking import Response
-from ckantest.models import TestBase
 from ckanext.doi.lib.api import DataciteClient
-import constants
+from ckantest.models import TestBase
 from datacite.errors import DataCiteError
+
+import constants
+
 
 class TestAPI(TestBase):
     plugins = [u'doi']
