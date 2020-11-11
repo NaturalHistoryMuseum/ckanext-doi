@@ -12,7 +12,6 @@ from ckan.plugins import PluginImplementations, toolkit
 from ckanext.doi.interfaces import IDoi
 from ckanext.doi.lib import xml_utils
 from ckanext.doi.lib.helpers import date_or_none, get_site_url, package_get_year
-import datetime
 
 log = logging.getLogger(__name__)
 
@@ -85,7 +84,9 @@ def build_metadata_dict(pkg_dict):
         tags = pkg_dict.get(u'tag_string', u'').split(u',')
         tags += [tag[u'name'] if isinstance(tag, dict) else tag for tag in
                  pkg_dict.get(u'tags', [])]
-        optional[u'subjects'] = sorted(list(set([{u'subject': t} for t in tags if t != u''])))
+        optional[u'subjects'] = sorted(list(set([{
+                                                     u'subject': t
+                                                 } for t in tags if t != u''])))
     except Exception as e:
         errors[u'subjects'] = e
 
