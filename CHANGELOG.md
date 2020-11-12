@@ -12,6 +12,17 @@ Features planned for development.
 
 3. Tests. There are no tests.
 
+## [2.0.0-alpha] - 2020-11-11
+
+- Refactored to organise the code better and align with similar extensions like [`ckanext-query-dois`](https://github.com/NaturalHistoryMuseum/ckanext-query-dois)
+- Now uses [datacite](https://github.com/inveniosoftware/datacite) Python library
+- Uses Datacite [schema 4.2](https://schema.datacite.org/meta/kernel-4.2)
+- Breaking `IDoi` interface changes:
+    - `build_metadata` changed to `build_metadata_dict`
+    - `build_metadata_dict` has additional `errors` parameter and return value (a dict of metadata keys and any errors encountered while attempting to retrieve a value)
+    - `metadata_to_xml` changed to `build_xml_dict` (because it wasn't actually creating any xml)
+    - `build_xml_dict` parameters rearranged (to better match `build_metadata_dict`)
+    - new method: `convert_package_update` converts a pkg_dict returned from package_update so that its metadata will be the same as that extracted from the package_show version
 
 ## [1.0.0-alpha] - 2019-07-23
 
