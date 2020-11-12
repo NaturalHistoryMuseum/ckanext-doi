@@ -12,6 +12,7 @@ from ckan.plugins import PluginImplementations, toolkit
 from ckanext.doi.interfaces import IDoi
 from ckanext.doi.lib import xml_utils
 from ckanext.doi.lib.helpers import date_or_none, get_site_url, package_get_year
+from ckanext.doi.lib.errors import DOIMetadataException
 
 log = logging.getLogger(__name__)
 
@@ -224,7 +225,7 @@ def build_metadata_dict(pkg_dict):
         log.exception(error_msg)
         for k, e in required_errors.items():
             log.exception('{0}: {1}'.format(k, e))
-        raise MetadataException(error_msg)
+        raise DOIMetadataException(error_msg)
 
     optional_errors = {k: e for k, e in errors.items() if k in optional}
     if len(required_errors) > 0:
@@ -299,8 +300,7 @@ def build_xml_dict(metadata_dict):
         else:
             xml_dict[k] = v
 
+    for plugin in PluginImplementations(IDoi):
+        xml_dict = plugin.build_xml_dict(metadata_dict, xml_dict)
+
     return xml_dict
-
-
-class MetadataException(Exception):
-    pass

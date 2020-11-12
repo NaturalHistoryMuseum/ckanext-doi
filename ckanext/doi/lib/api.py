@@ -19,11 +19,13 @@ log = logging.getLogger(__name__)
 
 
 class DataciteClient(object):
+    test_url = u'https://mds.test.datacite.org'
+
     def __init__(self):
         self.username = toolkit.config.get(u'ckanext.doi.account_name')
         self.password = toolkit.config.get(u'ckanext.doi.account_password')
         self._test_mode = None
-        self._prefix = None
+        self.prefix = self.get_prefix()
         client_config = {
             u'username': self.username,
             u'password': self.password,
@@ -32,7 +34,7 @@ class DataciteClient(object):
         }
         if self.test_mode:
             # temporary fix because datacite 1.0.1 isn't updated for the test prefix deprecation
-            client_config[u'url'] = u'https://mds.test.datacite.org'
+            client_config[u'url'] = self.test_url
         self.client = DataCiteMDSClient(**client_config)
 
     @property
@@ -44,21 +46,20 @@ class DataciteClient(object):
             self._test_mode = asbool(toolkit.config.get(u'ckanext.doi.test_mode', True))
         return self._test_mode
 
-    @property
-    def prefix(self):
+    @classmethod
+    def get_prefix(cls):
         '''Get the prefix to use for DOIs.
         :return: config prefix setting
         '''
-        if self._prefix is None:
-            DEPRECATED_TEST_PREFIX = u'10.5072'
-            self._prefix = toolkit.config.get(u'ckanext.doi.prefix')
-            if self._prefix is None:
-                raise TypeError(u'You must set the ckanext.doi.prefix config value')
-            if self._prefix == DEPRECATED_TEST_PREFIX:
-                raise ValueError(
-                    u'The test prefix {0} has been retired; use a prefix defined in your datacite '
-                    u'test account'.format(DEPRECATED_TEST_PREFIX))
-        return self._prefix
+        DEPRECATED_TEST_PREFIX = u'10.5072'
+        prefix = toolkit.config.get(u'ckanext.doi.prefix')
+        if prefix is None:
+            raise TypeError(u'You must set the ckanext.doi.prefix config value')
+        if prefix == DEPRECATED_TEST_PREFIX:
+            raise ValueError(
+                u'The test prefix {0} has been retired; use a prefix defined in your datacite '
+                u'test account'.format(DEPRECATED_TEST_PREFIX))
+        return prefix
 
     def generate_doi(self):
         '''
