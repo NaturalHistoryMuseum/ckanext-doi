@@ -35,5 +35,11 @@ class IDoi(interfaces.Interface):
         '''
         return xml_dict
 
-    def is_updated(self, pkg_dict):
-        return False
+    def convert_package_update(self, pkg_update_dict):
+        '''Ensure that a pkg_dict returned from a package_update method would match that returned
+        from package_show (at least for the purposes of extracting metadata via build_metadata_dict).
+
+        :param pkg_update_dict: pkg_dict returned from package_update
+        :returns: the modified pkg_update_dict
+        '''
+        return pkg_update_dict

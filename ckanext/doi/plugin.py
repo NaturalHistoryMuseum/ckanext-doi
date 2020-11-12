@@ -8,10 +8,8 @@ from datetime import datetime
 from logging import getLogger
 
 from ckanext.doi.lib.helpers import get_site_title, package_get_year, get_site_url
-from ckanext.doi.lib.metadata import build_metadata_dict, build_xml_dict
+from ckanext.doi.lib.metadata import build_metadata_dict, build_xml_dict, convert_package_update
 from ckanext.doi.lib.api import DataciteClient
-# from ckanext.doi.lib import (get_site_url, publish_doi,
-#                              update_doi, validate_metadata)
 from ckanext.doi.model import doi as doi_model
 from ckanext.doi.model.crud import DOIQuery
 
@@ -60,7 +58,8 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
 
             # remove user-defined update schemas first (if needed)
             context.pop(u'schema', None)
-            # Load the original package, so we can determine if user has changed any fields FIXME
+
+            # Load the original package
             orig_pkg_dict = toolkit.get_action(u'package_show')(context, {
                 u'id': package_id
             })
@@ -73,8 +72,8 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
             # after package creation)
             doi = DOIQuery.read_package(package_id, create_if_none=True)
 
-            # Build the metadata dict to pass to DataCite service
-            metadata_dict = build_metadata_dict(pkg_dict)
+            converted_pkg_dict = convert_package_update(pkg_dict)
+            metadata_dict = build_metadata_dict(converted_pkg_dict)
             xml_dict = build_xml_dict(metadata_dict)
 
             client = DataciteClient()

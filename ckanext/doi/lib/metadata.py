@@ -11,8 +11,8 @@ from ckan.model import Package
 from ckan.plugins import PluginImplementations, toolkit
 from ckanext.doi.interfaces import IDoi
 from ckanext.doi.lib import xml_utils
-from ckanext.doi.lib.helpers import date_or_none, get_site_url, package_get_year
 from ckanext.doi.lib.errors import DOIMetadataException
+from ckanext.doi.lib.helpers import date_or_none, get_site_url, package_get_year
 
 log = logging.getLogger(__name__)
 
@@ -86,8 +86,8 @@ def build_metadata_dict(pkg_dict):
         tags += [tag[u'name'] if isinstance(tag, dict) else tag for tag in
                  pkg_dict.get(u'tags', [])]
         optional[u'subjects'] = sorted(list(set([{
-                                                     u'subject': t
-                                                 } for t in tags if t != u''])))
+            u'subject': t
+        } for t in tags if t != u''])))
     except Exception as e:
         errors[u'subjects'] = e
 
@@ -304,3 +304,15 @@ def build_xml_dict(metadata_dict):
         xml_dict = plugin.build_xml_dict(metadata_dict, xml_dict)
 
     return xml_dict
+
+
+def convert_package_update(pkg_update_dict):
+    '''
+    Ensure that a pkg_dict returned from a package_update method would match that returned from
+    package_show (at least for the purposes of extracting metadata via build_metadata_dict).
+    :param pkg_update_dict: pkg_dict returned from package_update
+    :return: the modified pkg_update_dict
+    '''
+    for plugin in PluginImplementations(IDoi):
+        pkg_update_dict = plugin.convert_package_update(pkg_update_dict)
+    return pkg_update_dict
