@@ -5,7 +5,7 @@
 # Created by the Natural History Museum in London, UK
 
 
-def create_contributor(full_name=None, family_name=None, given_name=None, is_org=False, contributor_type=None, affiliation=None):
+def create_contributor(full_name=None, family_name=None, given_name=None, is_org=False, contributor_type=None, affiliations=None):
     '''
     Create a dictionary representation of a contributing entity (either a person or an
     organisation) for use in an xml_dict.
@@ -42,6 +42,10 @@ def create_contributor(full_name=None, family_name=None, given_name=None, is_org
     }
     if contributor_type is not None:
         person[u'contributorType'] = contributor_type
-    if affiliation is not None:
-        person[u'affiliation'] = affiliation
+    if affiliations is not None:
+        person[u'affiliations'] = []
+        if isinstance(affiliations, str):
+            affiliations = [affiliations]
+        for affiliation in affiliations:
+            person[u'affiliations'].append({u'affiliation': affiliation})
     return person

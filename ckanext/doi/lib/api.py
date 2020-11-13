@@ -7,10 +7,10 @@
 import logging
 import random
 import string
+from datetime import datetime as dt
 
-from ckan import model
 from ckan.plugins import toolkit
-from ckanext.doi.model.doi import DOI
+from ckanext.doi.model.crud import DOIQuery
 from datacite import DataCiteMDSClient, schema42
 from datacite.errors import DataCiteError, DataCiteNotFoundError
 from paste.deploy.converters import asbool
@@ -82,7 +82,7 @@ class DataciteClient(object):
             doi = u'{}/{}'.format(self.prefix, identifier)
 
             # check this doi doesn't exist in the table
-            if model.Session.query(DOI).filter(DOI.identifier == doi).count():
+            if DOIQuery.read_doi(doi) is not None:
                 continue
 
             # check against the datacite service
@@ -120,6 +120,9 @@ class DataciteClient(object):
         permalink = site + u'dataset/' + package_id
         # mint the DOI
         self.client.doi_post(doi, permalink)
+        if DOIQuery.read_doi(doi) is None:
+            DOIQuery.create(doi, package_id)
+        DOIQuery.update_doi(doi, published=dt.now())
 
     def set_metadata(self, doi, xml_dict):
         '''

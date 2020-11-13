@@ -7,14 +7,13 @@
 from datetime import datetime
 from logging import getLogger
 
-from ckanext.doi.lib.helpers import get_site_title, package_get_year, get_site_url
-from ckanext.doi.lib.metadata import build_metadata_dict, build_xml_dict, convert_package_update
-from ckanext.doi.lib.api import DataciteClient
-from ckanext.doi.model import doi as doi_model
-from ckanext.doi.model.crud import DOIQuery
-
 from ckan import model
 from ckan.plugins import SingletonPlugin, implements, interfaces, toolkit
+from ckanext.doi.lib.api import DataciteClient
+from ckanext.doi.lib.helpers import get_site_title, get_site_url, package_get_year
+from ckanext.doi.lib.metadata import build_metadata_dict, build_xml_dict, convert_package_update
+from ckanext.doi.model import doi as doi_model
+from ckanext.doi.model.crud import DOIQuery
 
 log = getLogger(__name__)
 
@@ -86,9 +85,32 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
             else:
                 # Before updating, check if any of the metadata has been changed - otherwise we
                 # end up sending loads of revisions to DataCite for minor edits
-                orig_metadata_dict = build_metadata_dict(orig_pkg_dict, doi)
+                orig_metadata_dict = build_metadata_dict(orig_pkg_dict)
                 # Check if the two dictionaries are the same
-                if cmp(orig_metadata_dict, metadata_dict) != 0:
+                same = True
+                for k, new_value in metadata_dict.items():
+                    old_value = orig_metadata_dict.get(k)
+                    if k == u'dates':
+                        new_dates = {d[u'dateType']: d for d in new_value}
+                        old_dates = {d[u'dateType']: d for d in old_value}
+                        diff = [new_dates.get(date_type) == old_dates.get(date_type) for
+                                date_type in set(new_dates.keys() + old_dates.keys()) if
+                                date_type not in ['Updated', 'Issued']]
+                        if not all(diff):
+                            same = False
+                    else:
+                        try:
+                            if isinstance(new_value, dict) and isinstance(old_value, dict):
+                                same = cmp(new_value, old_value) != 0
+                            elif isinstance(new_value, list) and isinstance(old_value, list):
+                                same = sorted(new_value) == sorted(old_value)
+                            else:
+                                same = new_value == old_value
+                        except:
+                            same = False
+                    if not same:
+                        break
+                if not same:
                     # Not the same, so we want to update the metadata
                     client.set_metadata(doi.identifier, xml_dict)
                     toolkit.h.flash_success(u'DataCite DOI metadata updated')

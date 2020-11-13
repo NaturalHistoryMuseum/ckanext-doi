@@ -294,8 +294,9 @@ def build_xml_dict(metadata_dict):
         elif k == u'dates':
             item = []
             for date_entry in v:
-                date_entry[u'date'] = str(date_entry[u'date'])
-                item.append(date_entry)
+                date_entry_copy = {k: v for k, v in date_entry.items()}
+                date_entry_copy[u'date'] = str(date_entry_copy[u'date'])
+                item.append(date_entry_copy)
             xml_dict[k] = item
         else:
             xml_dict[k] = v

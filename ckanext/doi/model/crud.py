@@ -6,7 +6,6 @@
 
 from ckan.model import Session
 from ckanext.doi.model.doi import DOI, doi_table
-from ckanext.doi.lib.api import DataciteClient
 
 
 class DOIQuery(object):
@@ -46,6 +45,7 @@ class DOIQuery(object):
                                given package
         :return: the record object
         '''
+        from ckanext.doi.lib.api import DataciteClient
         record = Session.query(DOI).filter(DOI.package_id == package_id).first()
         if record is None and create_if_none:
             client = DataciteClient()
@@ -62,7 +62,7 @@ class DOIQuery(object):
         :return: the updated record object
         '''
         update_dict = {k: v for k, v in kwargs.items() if k in cls.cols}
-        Session.query(DOI).filter(DOI.identifier == identifier).update(**update_dict)
+        Session.query(DOI).filter(DOI.identifier == identifier).update(update_dict)
         Session.commit()
         return cls.read_doi(identifier)
 
@@ -75,7 +75,7 @@ class DOIQuery(object):
         :return: the updated record object
         '''
         update_dict = {k: v for k, v in kwargs.items() if k in cls.cols}
-        Session.query(DOI).filter(DOI.package_id == package_id).update(**update_dict)
+        Session.query(DOI).filter(DOI.package_id == package_id).update(update_dict)
         Session.commit()
         return cls.read_package(package_id)
 
