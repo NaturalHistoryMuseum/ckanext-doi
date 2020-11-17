@@ -33,8 +33,7 @@ setup(
     install_requires=[
         'requests',
         'xmltodict==0.9.0',
-        'jsonschema==3.0.0',
-        'datacite==1.0.1'
+        'jsonschema==3.0.0'
         ],
     entry_points= \
         u'''
