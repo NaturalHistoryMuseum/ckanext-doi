@@ -34,5 +34,6 @@ cd $HERE
 pip install -r dev_requirements.txt
 python setup.py install
 pip install -r requirements.txt
+pip install git+https://github.com/inveniosoftware/datacite.git
 
 sed -i "/\[loggers\]/ { N; s/\[loggers\]\n/ckanext.doi.account_name = $DATACITE_ACCOUNT_NAME\nckanext.doi.account_password = $DATACITE_ACCOUNT_PASSWORD\nckanext.doi.prefix = $DATACITE_PREFIX\n\n&/ }" $HERE/ckanext/doi/tests/bin/test.ini
