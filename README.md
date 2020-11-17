@@ -169,14 +169,6 @@ Parameter|Description
 `xml_dict`|The current xml dict, created by the ckanext-doi extension and any previous plugins implementing IDoi.
 
 
-### `convert_package_update(pkg_update_dict)`
-**New in v2**
-Ensure that a `pkg_dict` returned from a `package_update` method would match that returned from `package_show` (at least for the purposes of extracting metadata via `build_metadata_dict`).
-
-Parameter|Description
----------|-----------
-`pkg_update_dict`|`pkg_dict` returned from `package_update`
-
 ## Templates
 
 ### Package citation snippet

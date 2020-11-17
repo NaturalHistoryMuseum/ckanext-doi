@@ -143,3 +143,15 @@ class DataciteClient(object):
         xml_doc = schema42.tostring(xml_dict)
         # create the metadata on datacite
         self.client.metadata_post(xml_doc)
+
+    def get_metadata(self, doi):
+        '''
+        Retrieve metadata for a given DOI on datacite.
+        :param doi: the DOI for which to retrieve the stored metadata
+        :return:
+        '''
+        try:
+            metadata = self.client.metadata_get(doi)
+        except DataCiteNotFoundError:
+            metadata = None
+        return metadata

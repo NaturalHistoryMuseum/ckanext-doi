@@ -7,13 +7,15 @@
 from datetime import datetime
 from logging import getLogger
 
+import xmltodict
 from ckan import model
 from ckan.plugins import SingletonPlugin, implements, interfaces, toolkit
 from ckanext.doi.lib.api import DataciteClient
 from ckanext.doi.lib.helpers import get_site_title, get_site_url, package_get_year
-from ckanext.doi.lib.metadata import build_metadata_dict, build_xml_dict, convert_package_update
+from ckanext.doi.lib.metadata import build_metadata_dict, build_xml_dict
 from ckanext.doi.model import doi as doi_model
 from ckanext.doi.model.crud import DOIQuery
+from datacite import schema42
 
 log = getLogger(__name__)
 
@@ -58,21 +60,16 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
             # remove user-defined update schemas first (if needed)
             context.pop(u'schema', None)
 
-            # Load the original package
-            orig_pkg_dict = toolkit.get_action(u'package_show')(context, {
+            # Load the package_show version of the dict
+            pkg_show_dict = toolkit.get_action(u'package_show')(context, {
                 u'id': package_id
             })
-
-            # If metadata_created isn't populated in pkg_dict, copy from the original
-            if u'metadata_created' not in pkg_dict:
-                pkg_dict[u'metadata_created'] = orig_pkg_dict.get(u'metadata_created', u'')
 
             # Load or create the local DOI (package may not have a DOI if extension was loaded
             # after package creation)
             doi = DOIQuery.read_package(package_id, create_if_none=True)
 
-            converted_pkg_dict = convert_package_update(pkg_dict)
-            metadata_dict = build_metadata_dict(converted_pkg_dict)
+            metadata_dict = build_metadata_dict(pkg_show_dict)
             xml_dict = build_xml_dict(metadata_dict)
 
             client = DataciteClient()
@@ -83,33 +80,15 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
                 client.mint_doi(doi.identifier, package_id)
                 toolkit.h.flash_success(u'DataCite DOI created')
             else:
-                # Before updating, check if any of the metadata has been changed - otherwise we
-                # end up sending loads of revisions to DataCite for minor edits
-                orig_metadata_dict = build_metadata_dict(orig_pkg_dict)
-                # Check if the two dictionaries are the same
-                same = True
-                for k, new_value in metadata_dict.items():
-                    old_value = orig_metadata_dict.get(k)
-                    if k == u'dates':
-                        new_dates = {d[u'dateType']: d for d in new_value}
-                        old_dates = {d[u'dateType']: d for d in old_value}
-                        diff = [new_dates.get(date_type) == old_dates.get(date_type) for
-                                date_type in set(new_dates.keys() + old_dates.keys()) if
-                                date_type not in ['Updated', 'Issued']]
-                        if not all(diff):
-                            same = False
-                    else:
-                        try:
-                            if isinstance(new_value, dict) and isinstance(old_value, dict):
-                                same = cmp(new_value, old_value) != 0
-                            elif isinstance(new_value, list) and isinstance(old_value, list):
-                                same = sorted(new_value) == sorted(old_value)
-                            else:
-                                same = new_value == old_value
-                        except:
-                            same = False
-                    if not same:
-                        break
+                posted_xml = client.get_metadata(doi.identifier)
+                posted_xml_dict = dict(xmltodict.parse(posted_xml)[u'resource'])
+                new_xml_dict = dict(xmltodict.parse(schema42.tostring(xml_dict))[u'resource'])
+                del posted_xml_dict[u'identifier']
+                posted_xml_dict[u'dates'][u'date'] = [d for d in posted_xml_dict[u'dates'][u'date']
+                                                      if d[u'@dateType'] != u'Updated']
+                new_xml_dict[u'dates'][u'date'] = [d for d in new_xml_dict[u'dates'][u'date']
+                                                   if d[u'@dateType'] != u'Updated']
+                same = cmp(posted_xml_dict, new_xml_dict) == 0
                 if not same:
                     # Not the same, so we want to update the metadata
                     client.set_metadata(doi.identifier, xml_dict)

@@ -305,15 +305,3 @@ def build_xml_dict(metadata_dict):
         xml_dict = plugin.build_xml_dict(metadata_dict, xml_dict)
 
     return xml_dict
-
-
-def convert_package_update(pkg_update_dict):
-    '''
-    Ensure that a pkg_dict returned from a package_update method would match that returned from
-    package_show (at least for the purposes of extracting metadata via build_metadata_dict).
-    :param pkg_update_dict: pkg_dict returned from package_update
-    :return: the modified pkg_update_dict
-    '''
-    for plugin in PluginImplementations(IDoi):
-        pkg_update_dict = plugin.convert_package_update(pkg_update_dict)
-    return pkg_update_dict
