@@ -24,6 +24,7 @@ Features planned for development.
     - `build_xml_dict` parameters rearranged (to better match `build_metadata_dict`)
     - the dict used is now the `package_show` dict instead of the `package_update` dict because it has more information
 - Changes in metadata are checked directly against the xml stored in Datacite
+- New command for updating datacite metadata without updating the package: `update-doi`
 
 
 ## [1.0.0-alpha] - 2019-07-23

@@ -7,7 +7,6 @@
 from datetime import datetime
 from logging import getLogger
 
-import xmltodict
 from ckan import model
 from ckan.plugins import SingletonPlugin, implements, interfaces, toolkit
 from ckanext.doi.lib.api import DataciteClient
@@ -15,7 +14,6 @@ from ckanext.doi.lib.helpers import get_site_title, get_site_url, package_get_ye
 from ckanext.doi.lib.metadata import build_metadata_dict, build_xml_dict
 from ckanext.doi.model import doi as doi_model
 from ckanext.doi.model.crud import DOIQuery
-from datacite import schema42
 
 log = getLogger(__name__)
 
@@ -80,15 +78,7 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
                 client.mint_doi(doi.identifier, package_id)
                 toolkit.h.flash_success(u'DataCite DOI created')
             else:
-                posted_xml = client.get_metadata(doi.identifier)
-                posted_xml_dict = dict(xmltodict.parse(posted_xml)[u'resource'])
-                new_xml_dict = dict(xmltodict.parse(schema42.tostring(xml_dict))[u'resource'])
-                del posted_xml_dict[u'identifier']
-                posted_xml_dict[u'dates'][u'date'] = [d for d in posted_xml_dict[u'dates'][u'date']
-                                                      if d[u'@dateType'] != u'Updated']
-                new_xml_dict[u'dates'][u'date'] = [d for d in new_xml_dict[u'dates'][u'date']
-                                                   if d[u'@dateType'] != u'Updated']
-                same = cmp(posted_xml_dict, new_xml_dict) == 0
+                same = client.check_for_update(doi.identifier, xml_dict)
                 if not same:
                     # Not the same, so we want to update the metadata
                     client.set_metadata(doi.identifier, xml_dict)

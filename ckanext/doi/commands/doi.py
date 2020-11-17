@@ -12,6 +12,9 @@ from ckan.plugins import toolkit
 from ckanext.doi.lib.api import DataciteClient
 from ckanext.doi.model.doi import DOI
 from ckanext.doi.model.repo import Repository
+from ckanext.doi.model.crud import DOIQuery
+from ckanext.doi.lib.api import DataciteClient
+from ckanext.doi.lib.metadata import build_metadata_dict, build_xml_dict
 
 log = logging.getLogger(__name__)
 
@@ -43,6 +46,8 @@ class DOICommand(toolkit.CkanCommand):
             self.delete_dois()
         elif cmd == u'upgrade-db':
             self.upgrade_db()
+        elif cmd == u'update-doi':
+            self.update_doi(self.args[1] if len(self.args) > 1 else None)
         else:
             print u'Command %s not recognized' % cmd
 
@@ -71,3 +76,42 @@ class DOICommand(toolkit.CkanCommand):
             repo.upgrade(self.args[1])
         else:
             repo.upgrade()
+
+    def update_doi(self, pkg_id):
+        if pkg_id is None:
+            dois_to_update = Session.query(DOI).all()
+        else:
+            dois_to_update = []
+            doi_record = DOIQuery.read_package(pkg_id)
+            if doi_record is not None:
+                dois_to_update = [doi_record]
+
+        if len(dois_to_update) == 0:
+            print(u'Nothing to update.')
+            return
+
+        for record in dois_to_update:
+            pkg_dict = toolkit.get_action(u'package_show')({}, {
+                u'id': record.package_id
+            })
+            if record.published is None:
+                print(u'"{0}" does not have a published DOI; not updating.'.format(
+                    pkg_dict.get(u'title', record.package_id)))
+                continue
+            if pkg_dict.get(u'state', u'active') != u'active' or pkg_dict.get(u'private', False):
+                print(u'"{0}" is inactive or private; not updating.'.format(
+                    pkg_dict.get(u'title', record.package_id)))
+                continue
+
+            metadata_dict = build_metadata_dict(pkg_dict)
+            xml_dict = build_xml_dict(metadata_dict)
+
+            client = DataciteClient()
+
+            same = client.check_for_update(record.identifier, xml_dict)
+            if not same:
+                client.set_metadata(record.identifier, xml_dict)
+                print(u'Updated "{0}".'.format(pkg_dict.get(u'title', record.package_id)))
+            else:
+                print(u'"{0}" does not need updating.'.format(
+                    pkg_dict.get(u'title', record.package_id)))

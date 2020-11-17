@@ -9,6 +9,7 @@ import random
 import string
 from datetime import datetime as dt
 
+import xmltodict
 from ckan.plugins import toolkit
 from ckanext.doi.model.crud import DOIQuery
 from datacite import DataCiteMDSClient, schema42
@@ -155,3 +156,14 @@ class DataciteClient(object):
         except DataCiteNotFoundError:
             metadata = None
         return metadata
+
+    def check_for_update(self, doi, xml_dict):
+        posted_xml = self.get_metadata(doi)
+        posted_xml_dict = dict(xmltodict.parse(posted_xml)[u'resource'])
+        new_xml_dict = dict(xmltodict.parse(schema42.tostring(xml_dict))[u'resource'])
+        del posted_xml_dict[u'identifier']
+        posted_xml_dict[u'dates'][u'date'] = [d for d in posted_xml_dict[u'dates'][u'date']
+                                              if d[u'@dateType'] != u'Updated']
+        new_xml_dict[u'dates'][u'date'] = [d for d in new_xml_dict[u'dates'][u'date']
+                                           if d[u'@dateType'] != u'Updated']
+        return cmp(posted_xml_dict, new_xml_dict) == 0

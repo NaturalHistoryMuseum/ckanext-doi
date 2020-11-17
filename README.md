@@ -137,6 +137,11 @@ You will need a development/test account to use this plugin in test mode, and a 
     paster --plugin=ckanext-doi doi delete-dois -c $CONFIG_FILE
     ```
 
+2. `update-doi`: update the datacite metadata for one or all packages.
+    ```bash
+    paster --plugin=ckanext-doi doi update-doi [PACKAGE_ID] -c $CONFIG_FILE
+    ```
+
 ## Interfaces
 
 The `IDoi` interface allows plugins to extend the `build_metadata_dict` and `build_xml_dict` methods.
