@@ -18,7 +18,8 @@ import constants
 class TestGenerate(TestBase):
     plugins = [u'doi', u'datastore']
     persist = {
-        u'ckanext.doi.debug': True
+        u'ckanext.doi.test_mode': True,
+        u'ckanext.doi.publisher': 'Example Publisher'
     }
 
     @classmethod
@@ -50,7 +51,7 @@ class TestGenerate(TestBase):
         nose.tools.assert_equal(1, len(metadata_dict[u'creators']))
         nose.tools.assert_equal(1, len(metadata_dict[u'titles']))
         nose.tools.assert_equal(constants.PKG_DICT[u'title'], metadata_dict[u'titles'][0][u'title'])
-        nose.tools.assert_is_instance(metadata_dict[u'publisher'], str)
+        nose.tools.assert_equal(metadata_dict[u'publisher'], u'Example Publisher')
         nose.tools.assert_is_instance(metadata_dict[u'publicationYear'], int)
         nose.tools.assert_equal(constants.PKG_DICT[u'type'], metadata_dict[u'resourceType'])
 
