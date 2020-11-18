@@ -121,8 +121,11 @@ class DataciteClient(object):
         permalink = site + u'dataset/' + package_id
         # mint the DOI
         self.client.doi_post(doi, permalink)
-        if DOIQuery.read_doi(doi) is None:
+        if DOIQuery.read_doi(doi) is None and DOIQuery.read_package(package_id) is None:
             DOIQuery.create(doi, package_id)
+        elif DOIQuery.read_doi(doi) is None:
+            # in case this was previously attempted but no DOI was added
+            DOIQuery.update_package(package_id, identifier=doi)
         DOIQuery.update_doi(doi, published=dt.now())
 
     def set_metadata(self, doi, xml_dict):

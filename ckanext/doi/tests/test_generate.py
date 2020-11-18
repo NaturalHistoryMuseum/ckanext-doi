@@ -8,6 +8,7 @@ import mock
 import nose
 import pkg_resources
 from ckanext.doi.lib.metadata import build_metadata_dict, build_xml_dict
+from ckanext.doi.model.doi import doi_table
 from ckantest.models import TestBase
 from datacite.jsonutils import validator_factory
 
@@ -23,10 +24,23 @@ class TestGenerate(TestBase):
     @classmethod
     def setup_class(cls):
         super(TestGenerate, cls).setup_class()
+        cls.data_factory().refresh()
+        doi_table.create(checkfirst=True)
 
     def run(self, result=None):
         with mock.patch('ckan.lib.helpers.session', self._session):
             super(TestGenerate, self).run(result)
+
+    @property
+    def pkg_record(self):
+        if self.data_factory().packages.get('pkg_record', None) is None:
+            pkg_data = {
+                u'author': u'Author, Test',
+                u'title': u'Test Package',
+                u'doi_date_published': u'2020-01-01'
+            }
+            self.data_factory().package(name='pkg_record', activate=False, **pkg_data)
+        return self.data_factory().packages['pkg_record']
 
     def test_extracts_metadata(self):
         metadata_dict = build_metadata_dict(constants.PKG_DICT)
