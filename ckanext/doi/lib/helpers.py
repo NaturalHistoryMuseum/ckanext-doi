@@ -7,7 +7,6 @@
 from datetime import datetime
 
 import dateutil.parser as parser
-
 from ckan.plugins import toolkit
 
 
@@ -33,6 +32,23 @@ def get_site_title():
     return toolkit.config.get(u'ckanext.doi.site_title')
 
 
-def now():
-    ''' '''
-    return datetime.now()
+def get_site_url():
+    '''Get the site URL.
+    Try and use ckanext.doi.site_url but if that's not set use ckan.site_url
+    '''
+    site_url = toolkit.config.get(u'ckanext.doi.site_url', toolkit.config.get(u'ckan.site_url', u''))
+    return site_url.rstrip('/')
+
+
+def date_or_none(date_object_or_string):
+    '''
+    Try and convert the given object into a datetime; if not possible, return None.
+    :param date_object_or_string: a datetime or date string
+    :return: datetime or None
+    '''
+    if isinstance(date_object_or_string, datetime):
+        return date_object_or_string
+    elif isinstance(date_object_or_string, str):
+        return parser.parse(date_object_or_string)
+    else:
+        return None
