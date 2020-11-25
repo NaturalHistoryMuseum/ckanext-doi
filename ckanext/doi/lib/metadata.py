@@ -218,6 +218,10 @@ def build_metadata_dict(pkg_dict):
         # handle an item
         metadata_dict, errors = plugin.build_metadata_dict(pkg_dict, metadata_dict, errors)
 
+    for k in required:
+        if metadata_dict.get(k) is None and errors.get(k) is None:
+            errors[k] = DOIMetadataException('Required field cannot be None')
+
     required_errors = {k: e for k, e in errors.items() if k in required}
     if len(required_errors) > 0:
         error_msg = 'Could not extract metadata for the following required keys: {0}'.format(

@@ -168,7 +168,7 @@ class DataciteClient(object):
         :return: True if the two are the same, False if not
         '''
         posted_xml = self.get_metadata(doi)
-        if posted_xml is None:
+        if posted_xml is None or posted_xml.strip() == u'':
             return False
         posted_xml_dict = dict(xmltodict.parse(posted_xml).get(u'resource', {}))
         new_xml_dict = dict(xmltodict.parse(schema42.tostring(xml_dict))[u'resource'])

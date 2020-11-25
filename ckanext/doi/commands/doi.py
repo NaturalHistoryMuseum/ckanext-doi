@@ -14,7 +14,7 @@ from ckanext.doi.lib.metadata import build_metadata_dict, build_xml_dict
 from ckanext.doi.model.crud import DOIQuery
 from ckanext.doi.model.doi import DOI
 from ckanext.doi.model.repo import Repository
-from datacite.errors import DataCiteServerError
+from datacite.errors import DataCiteError
 
 log = logging.getLogger(__name__)
 
@@ -113,7 +113,7 @@ class DOICommand(toolkit.CkanCommand):
                 try:
                     client.set_metadata(record.identifier, xml_dict)
                     print(u'Updated "{0}".'.format(title))
-                except DataCiteServerError as e:
+                except DataCiteError as e:
                     print(u'Error while trying to update "{0}" (DOI {1}): {2}'.format(title,
                                                                                       record.identifier,
                                                                                       e.message))
