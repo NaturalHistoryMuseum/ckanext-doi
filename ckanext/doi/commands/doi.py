@@ -10,11 +10,11 @@ import logging
 from ckan.model import Session, meta
 from ckan.plugins import toolkit
 from ckanext.doi.lib.api import DataciteClient
+from ckanext.doi.lib.metadata import build_metadata_dict, build_xml_dict
+from ckanext.doi.model.crud import DOIQuery
 from ckanext.doi.model.doi import DOI
 from ckanext.doi.model.repo import Repository
-from ckanext.doi.model.crud import DOIQuery
-from ckanext.doi.lib.api import DataciteClient
-from ckanext.doi.lib.metadata import build_metadata_dict, build_xml_dict
+from datacite.errors import DataCiteServerError
 
 log = logging.getLogger(__name__)
 
@@ -94,13 +94,13 @@ class DOICommand(toolkit.CkanCommand):
             pkg_dict = toolkit.get_action(u'package_show')({}, {
                 u'id': record.package_id
             })
+            title = pkg_dict.get(u'title', record.package_id)
+
             if record.published is None:
-                print(u'"{0}" does not have a published DOI; not updating.'.format(
-                    pkg_dict.get(u'title', record.package_id)))
+                print(u'"{0}" does not have a published DOI; not updating.'.format(title))
                 continue
             if pkg_dict.get(u'state', u'active') != u'active' or pkg_dict.get(u'private', False):
-                print(u'"{0}" is inactive or private; not updating.'.format(
-                    pkg_dict.get(u'title', record.package_id)))
+                print(u'"{0}" is inactive or private; not updating.'.format(title))
                 continue
 
             metadata_dict = build_metadata_dict(pkg_dict)
@@ -110,8 +110,12 @@ class DOICommand(toolkit.CkanCommand):
 
             same = client.check_for_update(record.identifier, xml_dict)
             if not same:
-                client.set_metadata(record.identifier, xml_dict)
-                print(u'Updated "{0}".'.format(pkg_dict.get(u'title', record.package_id)))
+                try:
+                    client.set_metadata(record.identifier, xml_dict)
+                    print(u'Updated "{0}".'.format(title))
+                except DataCiteServerError as e:
+                    print(u'Error while trying to update "{0}" (DOI {1}): {2}'.format(title,
+                                                                                      record.identifier,
+                                                                                      e.message))
             else:
-                print(u'"{0}" does not need updating.'.format(
-                    pkg_dict.get(u'title', record.package_id)))
+                print(u'"{0}" does not need updating.'.format(title))

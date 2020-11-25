@@ -170,9 +170,10 @@ class DataciteClient(object):
         posted_xml = self.get_metadata(doi)
         if posted_xml is None:
             return False
-        posted_xml_dict = dict(xmltodict.parse(posted_xml)[u'resource'])
+        posted_xml_dict = dict(xmltodict.parse(posted_xml).get(u'resource', {}))
         new_xml_dict = dict(xmltodict.parse(schema42.tostring(xml_dict))[u'resource'])
-        del posted_xml_dict[u'identifier']
+        if u'identifier' in posted_xml_dict:
+            del posted_xml_dict[u'identifier']
         has_dates = u'dates' in posted_xml_dict and u'date' in posted_xml_dict[u'dates']
         if has_dates:
             posted_xml_dict[u'dates'][u'date'] = [d for d in posted_xml_dict[u'dates'][u'date']
