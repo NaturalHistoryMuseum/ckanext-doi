@@ -39,8 +39,5 @@ setup(
         u'''
         [ckan.plugins]
             doi=ckanext.doi.plugin:DOIPlugin
-
-        [paste.paster_command]
-            doi=ckanext.doi.commands.doi:DOICommand
         ''',
     )
