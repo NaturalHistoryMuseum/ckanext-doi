@@ -12,25 +12,22 @@ from ckan.plugins import SingletonPlugin, implements, interfaces, toolkit
 from ckanext.doi.lib.api import DataciteClient
 from ckanext.doi.lib.helpers import get_site_title, get_site_url, package_get_year
 from ckanext.doi.lib.metadata import build_metadata_dict, build_xml_dict
-from ckanext.doi.model import doi as doi_model
 from ckanext.doi.model.crud import DOIQuery
+from ckanext.doi import cli
 
 log = getLogger(__name__)
 
 
 class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
     '''CKAN DOI Extension'''
-    implements(interfaces.IConfigurable)
     implements(interfaces.IConfigurer)
     implements(interfaces.IPackageController, inherit=True)
     implements(interfaces.ITemplateHelpers, inherit=True)
+    implements(interfaces.IClick)
 
-    ## IConfigurable
-    def configure(self, config):
-        '''Called at the end of CKAN setup. Creates DOI table.
-        '''
-        if model.package_table.exists():
-            doi_model.doi_table.create(checkfirst=True)
+    ## IClick
+    def get_commands(self):
+        return cli.get_commands()
 
     ## IConfigurer
     def update_config(self, config):
