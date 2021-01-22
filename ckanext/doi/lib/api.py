@@ -82,30 +82,17 @@ class DataciteClient(object):
             # form the doi using the prefix
             doi = u'{}/{}'.format(self.prefix, identifier)
 
-            # check this doi doesn't exist in the table
-            if DOIQuery.read_doi(doi) is not None:
-                continue
-
-            # check against the datacite service
-            try:
-                self.client.metadata_get(doi)
-                # if a doi is found, we need to try again
-                continue
-            except DataCiteNotFoundError:
-                # if no doi is found, we're good!
-                pass
-            except DataCiteError as e:
-                log.warn(
-                    u'Error whilst checking new DOIs with DataCite. DOI: {}, error: {}'.format(doi,
-                                                                                               e.message))
-                attempts -= 1
-                continue
-
-            # if we've made it this far the doi isn't in the database
-            # and it's not in datacite already
-            return doi
-        else:
-            raise Exception(u'Failed to generate a DOI')
+            if DOIQuery.read_doi(doi) is None:
+                try:
+                    self.client.metadata_get(doi)
+                except DataCiteNotFoundError:
+                    return doi
+                except DataCiteError as e:
+                    log.warn(
+                        u'Error whilst checking new DOIs with DataCite. DOI: {}, error: {}'.format(
+                            doi, e.message))
+            attempts -= 1
+        raise Exception(u'Failed to generate a DOI')
 
     def mint_doi(self, doi, package_id):
         '''
