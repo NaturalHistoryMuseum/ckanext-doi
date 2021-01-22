@@ -6,6 +6,7 @@ services:
   - docker
 
 script:
+  - pip install coveralls
   - docker-compose build
   - docker-compose run ckan
 
