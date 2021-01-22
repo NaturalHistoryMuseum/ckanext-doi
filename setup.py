@@ -34,14 +34,14 @@ setup(
         # this is required to avoid installing a 0.17.x version of pyrsistent which is incompatible
         # with python2
         'pyrsistent~=0.16.1',
-        # force the same version as ckan (the datacite github repo installs a higher version)
-        'lxml==4.4.2',
+        # force the base same version as ckan (the datacite github repo installs a higher version)
+        'lxml~=4.4.0',
         'requests',
         'xmltodict==0.12.0',
         'jsonschema==3.0.0',
-        # force the same version as ckan
-        'python-dateutil==2.8.0',
-        ],
+        # force the same base version as ckan
+        'python-dateutil~=2.8.0',
+    ],
     entry_points= \
         u'''
         [ckan.plugins]
