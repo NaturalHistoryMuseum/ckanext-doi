@@ -5,6 +5,7 @@
 [![Travis](https://img.shields.io/travis/NaturalHistoryMuseum/ckanext-doi/master.svg?style=flat-square)](https://travis-ci.org/NaturalHistoryMuseum/ckanext-doi)
 [![Coveralls](https://img.shields.io/coveralls/github/NaturalHistoryMuseum/ckanext-doi/master.svg?style=flat-square)](https://coveralls.io/github/NaturalHistoryMuseum/ckanext-doi)
 [![CKAN](https://img.shields.io/badge/ckan-2.9.1-orange.svg?style=flat-square)](https://github.com/ckan/ckan)
+[![Python](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue.svg?style=flat-square)](https://www.python.org/)
 
 _A CKAN extension for assigning a digital object identifier (DOI) to datasets, using the DataCite DOI service._
 

@@ -48,7 +48,7 @@ class TestGenerateNewDOI(object):
             with patch(u'ckanext.doi.lib.api.DOIQuery.read_doi', mock_read_doi):
                 api = DataciteClient()
                 doi = api.generate_doi()
-                assert isinstance(doi, (str, unicode))
+                assert isinstance(doi, str)
                 # both the client and the database should be called once and only once (yes this
                 # goes against the comment at the start of this class but it felt relevant here to
                 # check that this was the case)
@@ -65,7 +65,7 @@ class TestGenerateNewDOI(object):
             with patch(u'ckanext.doi.lib.api.DOIQuery.read_doi', mock_read_doi):
                 api = DataciteClient()
                 doi = api.generate_doi()
-                assert isinstance(doi, (str, unicode))
+                assert isinstance(doi, str)
 
     def test_one_existing_on_datacite(self):
         # the first call to the datacite client returns a (mock) doi but then the next one succeeds
@@ -78,7 +78,7 @@ class TestGenerateNewDOI(object):
             with patch(u'ckanext.doi.lib.api.DOIQuery.read_doi', mock_read_doi):
                 api = DataciteClient()
                 doi = api.generate_doi()
-                assert isinstance(doi, (str, unicode))
+                assert isinstance(doi, str)
 
     def test_one_existing_on_datacite_and_one_in_the_db(self):
         # the first call to the datacite client returns a (mock) doi but then the next one succeeds
@@ -91,7 +91,7 @@ class TestGenerateNewDOI(object):
             with patch(u'ckanext.doi.lib.api.DOIQuery.read_doi', mock_read_doi):
                 api = DataciteClient()
                 doi = api.generate_doi()
-                assert isinstance(doi, (str, unicode))
+                assert isinstance(doi, str)
 
     def test_it_fails_when_it_cannot_generate_a_unique_doi(self):
         # the datacite client returns an existing (mock) doi every time, so unlikely!

@@ -6,7 +6,7 @@
 
 from setuptools import find_packages, setup
 
-__version__ = u'2.0.3'
+__version__ = u'3.0.0'
 
 with open(u'README.md', u'r') as f:
     __long_description__ = f.read()
@@ -17,9 +17,13 @@ setup(
     description=u'A CKAN extension for assigning a digital object identifier (DOI) to datasets, using the DataCite DOI service.',
     long_description=__long_description__,
     classifiers=[
-        u'Development Status :: 3 - Alpha',
-        u'Framework :: Flask',
-        u'Programming Language :: Python :: 2.7'
+        'Development Status :: 5 - Production/Stable',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3 :: Only',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
     keywords=u'CKAN data doi',
     author=u'Natural History Museum',
