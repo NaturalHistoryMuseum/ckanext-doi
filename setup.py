@@ -6,7 +6,7 @@
 
 from setuptools import find_packages, setup
 
-__version__ = u'2.0.2'
+__version__ = u'2.0.3'
 
 with open(u'README.md', u'r') as f:
     __long_description__ = f.read()
@@ -31,9 +31,6 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        # this is required to avoid installing a 0.17.x version of pyrsistent which is incompatible
-        # with python2
-        'pyrsistent~=0.16.1',
         # force the base same version as ckan (the datacite github repo installs a higher version)
         'lxml~=4.4.0',
         'requests',
