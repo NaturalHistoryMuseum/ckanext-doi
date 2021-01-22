@@ -11,31 +11,34 @@ from datetime import datetime as dt
 
 import xmltodict
 from ckan.plugins import toolkit
-from ckanext.doi.model.crud import DOIQuery
 from datacite import DataCiteMDSClient, schema42
 from datacite.errors import DataCiteError, DataCiteNotFoundError
 from paste.deploy.converters import asbool
 
+from ckanext.doi.model.crud import DOIQuery
+
 log = logging.getLogger(__name__)
 
+DEPRECATED_TEST_PREFIX = '10.5072'
 
-class DataciteClient(object):
-    test_url = u'https://mds.test.datacite.org'
+
+class DataciteClient:
+    test_url = 'https://mds.test.datacite.org'
 
     def __init__(self):
-        self.username = toolkit.config.get(u'ckanext.doi.account_name')
-        self.password = toolkit.config.get(u'ckanext.doi.account_password')
+        self.username = toolkit.config.get('ckanext.doi.account_name')
+        self.password = toolkit.config.get('ckanext.doi.account_password')
         self._test_mode = None
         self.prefix = self.get_prefix()
         client_config = {
-            u'username': self.username,
-            u'password': self.password,
-            u'prefix': self.prefix,
-            u'test_mode': self.test_mode
+            'username': self.username,
+            'password': self.password,
+            'prefix': self.prefix,
+            'test_mode': self.test_mode
         }
         if self.test_mode:
             # temporary fix because datacite 1.0.1 isn't updated for the test prefix deprecation
-            client_config[u'url'] = self.test_url
+            client_config['url'] = self.test_url
         self.client = DataCiteMDSClient(**client_config)
 
     @property
@@ -44,7 +47,7 @@ class DataciteClient(object):
         :return: test mode enabled as boolean (true=enabled)
         '''
         if self._test_mode is None:
-            self._test_mode = asbool(toolkit.config.get(u'ckanext.doi.test_mode', True))
+            self._test_mode = asbool(toolkit.config.get('ckanext.doi.test_mode', True))
         return self._test_mode
 
     @classmethod
@@ -52,14 +55,12 @@ class DataciteClient(object):
         '''Get the prefix to use for DOIs.
         :return: config prefix setting
         '''
-        DEPRECATED_TEST_PREFIX = u'10.5072'
-        prefix = toolkit.config.get(u'ckanext.doi.prefix')
+        prefix = toolkit.config.get('ckanext.doi.prefix')
         if prefix is None:
-            raise TypeError(u'You must set the ckanext.doi.prefix config value')
+            raise TypeError('You must set the ckanext.doi.prefix config value')
         if prefix == DEPRECATED_TEST_PREFIX:
-            raise ValueError(
-                u'The test prefix {0} has been retired; use a prefix defined in your datacite '
-                u'test account'.format(DEPRECATED_TEST_PREFIX))
+            raise ValueError(f'The test prefix {DEPRECATED_TEST_PREFIX} has been retired; use a '
+                             f'prefix defined in your datacite test account')
         return prefix
 
     def generate_doi(self):
@@ -78,9 +79,9 @@ class DataciteClient(object):
 
         while attempts > 0:
             # generate a random 8 character identifier
-            identifier = u''.join(random.choice(valid_characters) for _ in range(8))
+            identifier = ''.join(random.choice(valid_characters) for _ in range(8))
             # form the doi using the prefix
-            doi = u'{}/{}'.format(self.prefix, identifier)
+            doi = f'{self.prefix}/{identifier}'
 
             if DOIQuery.read_doi(doi) is None:
                 try:
@@ -88,11 +89,10 @@ class DataciteClient(object):
                 except DataCiteNotFoundError:
                     return doi
                 except DataCiteError as e:
-                    log.warn(
-                        u'Error whilst checking new DOIs with DataCite. DOI: {}, error: {}'.format(
-                            doi, e.message))
+                    log.warning(f'Error whilst checking new DOIs with DataCite. DOI: {doi}, '
+                                f'error: {e}')
             attempts -= 1
-        raise Exception(u'Failed to generate a DOI')
+        raise Exception('Failed to generate a DOI')
 
     def mint_doi(self, doi, package_id):
         '''
@@ -102,10 +102,10 @@ class DataciteClient(object):
         '''
 
         # create the URL the DOI will point to, i.e. the package page
-        site = toolkit.config.get(u'ckan.site_url')
-        if site[-1] != u'/':
-            site += u'/'
-        permalink = site + u'dataset/' + package_id
+        site = toolkit.config.get('ckan.site_url')
+        if site[-1] != '/':
+            site += '/'
+        permalink = f'{site}dataset/{package_id}'
         # mint the DOI
         self.client.doi_post(doi, permalink)
         if DOIQuery.read_doi(doi) is None and DOIQuery.read_package(package_id) is None:
@@ -122,9 +122,9 @@ class DataciteClient(object):
         :param xml_dict: the metadata as an xml dict (generated from build_xml_dict)
         :return:
         '''
-        xml_dict[u'identifier'] = {
-            u'identifierType': u'DOI',
-            u'identifier': doi
+        xml_dict['identifier'] = {
+            'identifierType': 'DOI',
+            'identifier': doi
         }
 
         # use an assert here because the data should be valid every time, otherwise it's
@@ -155,19 +155,19 @@ class DataciteClient(object):
         :return: True if the two are the same, False if not
         '''
         posted_xml = self.get_metadata(doi)
-        if posted_xml is None or posted_xml.strip() == u'':
+        if posted_xml is None or posted_xml.strip() == '':
             return False
-        posted_xml_dict = dict(xmltodict.parse(posted_xml).get(u'resource', {}))
-        new_xml_dict = dict(xmltodict.parse(schema42.tostring(xml_dict))[u'resource'])
-        if u'identifier' in posted_xml_dict:
-            del posted_xml_dict[u'identifier']
-        has_dates = u'dates' in posted_xml_dict and u'date' in posted_xml_dict[u'dates']
+        posted_xml_dict = dict(xmltodict.parse(posted_xml).get('resource', {}))
+        new_xml_dict = dict(xmltodict.parse(schema42.tostring(xml_dict))['resource'])
+        if 'identifier' in posted_xml_dict:
+            del posted_xml_dict['identifier']
+        has_dates = 'dates' in posted_xml_dict and 'date' in posted_xml_dict['dates']
         if has_dates:
-            posted_xml_dict[u'dates'][u'date'] = [d for d in posted_xml_dict[u'dates'][u'date']
-                                                  if d[u'@dateType'] != u'Updated']
-            new_xml_dict[u'dates'][u'date'] = [d for d in new_xml_dict[u'dates'][u'date']
-                                               if d[u'@dateType'] != u'Updated']
-            return cmp(posted_xml_dict, new_xml_dict) == 0
+            posted_xml_dict['dates']['date'] = [d for d in posted_xml_dict['dates']['date']
+                                                if d['@dateType'] != 'Updated']
+            new_xml_dict['dates']['date'] = [d for d in new_xml_dict['dates']['date']
+                                             if d['@dateType'] != 'Updated']
+            return posted_xml_dict == new_xml_dict
         else:
             # if the original doesn't have any dates, it's definitely different
             return False

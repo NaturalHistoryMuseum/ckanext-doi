@@ -28,8 +28,8 @@ def first_then(first, then):
         yield then
 
 
-@pytest.mark.ckan_config(u'ckanext.doi.prefix', u'testing')
-class TestGenerateNewDOI(object):
+@pytest.mark.ckan_config('ckanext.doi.prefix', 'testing')
+class TestGenerateNewDOI:
     '''
     In each of these tests we could assert the number of calls to the db and datacite client mocks
     but this feels like a bit too much of a reach into the internal logic of the function. We care
@@ -44,8 +44,8 @@ class TestGenerateNewDOI(object):
         # no dois in the database
         mock_read_doi = MagicMock(return_value=None)
 
-        with patch(u'ckanext.doi.lib.api.DataCiteMDSClient', MagicMock(return_value=mock_client)):
-            with patch(u'ckanext.doi.lib.api.DOIQuery.read_doi', mock_read_doi):
+        with patch('ckanext.doi.lib.api.DataCiteMDSClient', MagicMock(return_value=mock_client)):
+            with patch('ckanext.doi.lib.api.DOIQuery.read_doi', mock_read_doi):
                 api = DataciteClient()
                 doi = api.generate_doi()
                 assert isinstance(doi, str)
@@ -61,8 +61,8 @@ class TestGenerateNewDOI(object):
         # one doi in the database that hits the first call, but then the next time is fine
         mock_read_doi = MagicMock(side_effect=first_then(MagicMock(), None))
 
-        with patch(u'ckanext.doi.lib.api.DataCiteMDSClient', MagicMock(return_value=mock_client)):
-            with patch(u'ckanext.doi.lib.api.DOIQuery.read_doi', mock_read_doi):
+        with patch('ckanext.doi.lib.api.DataCiteMDSClient', MagicMock(return_value=mock_client)):
+            with patch('ckanext.doi.lib.api.DOIQuery.read_doi', mock_read_doi):
                 api = DataciteClient()
                 doi = api.generate_doi()
                 assert isinstance(doi, str)
@@ -74,8 +74,8 @@ class TestGenerateNewDOI(object):
         # no dois in the db
         mock_read_doi = MagicMock(return_value=None)
 
-        with patch(u'ckanext.doi.lib.api.DataCiteMDSClient', MagicMock(return_value=mock_client)):
-            with patch(u'ckanext.doi.lib.api.DOIQuery.read_doi', mock_read_doi):
+        with patch('ckanext.doi.lib.api.DataCiteMDSClient', MagicMock(return_value=mock_client)):
+            with patch('ckanext.doi.lib.api.DOIQuery.read_doi', mock_read_doi):
                 api = DataciteClient()
                 doi = api.generate_doi()
                 assert isinstance(doi, str)
@@ -87,8 +87,8 @@ class TestGenerateNewDOI(object):
         # the first call to the db returns a result but then after that we're all good
         mock_read_doi = MagicMock(side_effect=first_then(MagicMock(), None))
 
-        with patch(u'ckanext.doi.lib.api.DataCiteMDSClient', MagicMock(return_value=mock_client)):
-            with patch(u'ckanext.doi.lib.api.DOIQuery.read_doi', mock_read_doi):
+        with patch('ckanext.doi.lib.api.DataCiteMDSClient', MagicMock(return_value=mock_client)):
+            with patch('ckanext.doi.lib.api.DOIQuery.read_doi', mock_read_doi):
                 api = DataciteClient()
                 doi = api.generate_doi()
                 assert isinstance(doi, str)
@@ -99,10 +99,10 @@ class TestGenerateNewDOI(object):
         # the db returns an existing (mock) doi every time, so unlikely!
         mock_read_doi = MagicMock()
 
-        with patch(u'ckanext.doi.lib.api.DataCiteMDSClient', mock_client):
-            with patch(u'ckanext.doi.lib.api.DOIQuery.read_doi', mock_read_doi):
+        with patch('ckanext.doi.lib.api.DataCiteMDSClient', mock_client):
+            with patch('ckanext.doi.lib.api.DOIQuery.read_doi', mock_read_doi):
                 api = DataciteClient()
-                with pytest.raises(Exception, match=u'Failed to generate a DOI'):
+                with pytest.raises(Exception, match='Failed to generate a DOI'):
                     api.generate_doi()
 
 
@@ -124,13 +124,13 @@ class MockDataciteMDSClient(object):
 
     def metadata_post(self, xml_doc, *args, **kwargs):
         tree = ET.fromstring(xml_doc)
-        doi = tree.findtext(u'{http://datacite.org/schema/kernel-4}identifier')
+        doi = tree.findtext('{http://datacite.org/schema/kernel-4}identifier')
         self.metadata.add(doi)
 
 
-@pytest.mark.ckan_config(u'ckanext.doi.prefix', u'testing')
-@patch(u'ckanext.doi.lib.api.DataCiteMDSClient', MockDataciteMDSClient)
-@patch(u'ckanext.doi.lib.api.DOIQuery')
+@pytest.mark.ckan_config('ckanext.doi.prefix', 'testing')
+@patch('ckanext.doi.lib.api.DataCiteMDSClient', MockDataciteMDSClient)
+@patch('ckanext.doi.lib.api.DOIQuery')
 class TestMintNewDOI(object):
 
     def test_datacite_api_order(self, mock_crud):
@@ -138,7 +138,7 @@ class TestMintNewDOI(object):
         mock_crud.read_package = MagicMock(return_value=None)
 
         api = DataciteClient()
-        doi = constants.XML_DICT[u'identifier'][u'identifier']
+        doi = constants.XML_DICT['identifier']['identifier']
         pkg_id = MagicMock()
 
         with pytest.raises(DataCiteError):
@@ -152,7 +152,7 @@ class TestMintNewDOI(object):
         mock_crud.read_package = MagicMock(return_value=None)
 
         api = DataciteClient()
-        doi = constants.XML_DICT[u'identifier'][u'identifier']
+        doi = constants.XML_DICT['identifier']['identifier']
         pkg_id = MagicMock()
 
         api.set_metadata(doi, constants.XML_DICT)
@@ -167,7 +167,7 @@ class TestMintNewDOI(object):
         mock_crud.read_package = MagicMock(return_value=None)
 
         api = DataciteClient()
-        doi = constants.XML_DICT[u'identifier'][u'identifier']
+        doi = constants.XML_DICT['identifier']['identifier']
         pkg_id = MagicMock()
 
         api.set_metadata(doi, constants.XML_DICT)
@@ -182,7 +182,7 @@ class TestMintNewDOI(object):
         mock_crud.read_package = MagicMock(return_value=MagicMock())
 
         api = DataciteClient()
-        doi = constants.XML_DICT[u'identifier'][u'identifier']
+        doi = constants.XML_DICT['identifier']['identifier']
         pkg_id = MagicMock()
 
         api.set_metadata(doi, constants.XML_DICT)
@@ -197,7 +197,7 @@ class TestMintNewDOI(object):
         mock_crud.read_package = MagicMock(return_value=MagicMock())
 
         api = DataciteClient()
-        doi = constants.XML_DICT[u'identifier'][u'identifier']
+        doi = constants.XML_DICT['identifier']['identifier']
         pkg_id = MagicMock()
 
         api.set_metadata(doi, constants.XML_DICT)
@@ -208,22 +208,22 @@ class TestMintNewDOI(object):
         assert mock_crud.update_doi.called
 
 
-@pytest.mark.ckan_config(u'ckanext.doi.prefix', u'testing')
-@pytest.mark.ckan_config(u'ckanext.doi.account_name', u'goat!')
-@pytest.mark.ckan_config(u'ckanext.doi.account_password', u'hammocks?')
-@patch(u'ckanext.doi.lib.api.DataCiteMDSClient')
+@pytest.mark.ckan_config('ckanext.doi.prefix', 'testing')
+@pytest.mark.ckan_config('ckanext.doi.account_name', 'goat!')
+@pytest.mark.ckan_config('ckanext.doi.account_password', 'hammocks?')
+@patch('ckanext.doi.lib.api.DataCiteMDSClient')
 class TestDataciteClientCreation(object):
 
-    @pytest.mark.ckan_config(u'ckanext.doi.test_mode', False)
+    @pytest.mark.ckan_config('ckanext.doi.test_mode', False)
     def test_basics(self, mock_client):
         DataciteClient()
-        assert mock_client.called_once_with(username=u'goat!', password=u'hammocks?',
-                                            prefix=u'testing', test_mode=False)
-        assert u'url' not in mock_client.call_args.kwargs
+        assert mock_client.called_once_with(username='goat!', password='hammocks?',
+                                            prefix='testing', test_mode=False)
+        assert 'url' not in mock_client.call_args.kwargs
 
-    @pytest.mark.ckan_config(u'ckanext.doi.test_mode', True)
+    @pytest.mark.ckan_config('ckanext.doi.test_mode', True)
     def test_test_mode_true(self, mock_client):
         DataciteClient()
-        assert mock_client.called_once_with(username=u'goat!', password=u'hammocks?',
-                                            prefix=u'testing', test_mode=True,
+        assert mock_client.called_once_with(username='goat!', password='hammocks?',
+                                            prefix='testing', test_mode=True,
                                             url=DataciteClient.test_url)
