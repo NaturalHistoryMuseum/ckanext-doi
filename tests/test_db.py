@@ -7,7 +7,7 @@ import pytest
 from ckan.model import Session
 from ckan.tests import factories
 from datacite.errors import DataCiteNotFoundError
-from mock import patch, MagicMock
+from unittest.mock import patch, MagicMock
 
 from ckanext.doi.model.doi import DOI, doi_table
 

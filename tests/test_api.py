@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 
 import pytest
 from datacite.errors import DataCiteError, DataCiteNotFoundError
-from mock import patch, MagicMock
+from unittest.mock import patch, MagicMock
 
 from . import constants
 from ckanext.doi.lib.api import DataciteClient
