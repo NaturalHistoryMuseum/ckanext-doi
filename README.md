@@ -207,10 +207,10 @@ docker-compose build
    configuration, so you should only need to rebuild the ckan image if you change the extension's
    dependencies.
 ```bash
-docker-compose up --abort-on-container-exit
+docker-compose run ckan
 ```
 
-The ckan image uses the Dockerfile in the `docker/` folder which is based on `openknowledge/ckan-dev:2.9-py2`.
+The ckan image uses the Dockerfile in the `docker/` folder which is based on `openknowledge/ckan-dev:2.9`.
 
 Note that currently the tests mock the Datacite API and therefore don't require an internet
 connection nor your Datacite credentials to run.
