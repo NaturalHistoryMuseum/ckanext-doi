@@ -194,7 +194,7 @@ _Test coverage is currently extremely limited._
 To run the tests in this extension, there is a Docker compose configuration available in this
 repository to make it easy.
 
-To run the tests against ckan 2.9.x on Python2:
+To run the tests against ckan 2.9.x on Python3:
 
 1. Build the required images
 ```bash
