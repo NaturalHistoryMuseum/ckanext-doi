@@ -4,18 +4,17 @@
 # This file is part of ckanext-doi
 # Created by the Natural History Museum in London, UK
 
+import string
+
 import logging
 import random
-import string
-from datetime import datetime as dt
-
 import xmltodict
+from ckan.common import asbool
 from ckan.plugins import toolkit
+from ckanext.doi.model.crud import DOIQuery
 from datacite import DataCiteMDSClient, schema42
 from datacite.errors import DataCiteError, DataCiteNotFoundError
-from paste.deploy.converters import asbool
-
-from ckanext.doi.model.crud import DOIQuery
+from datetime import datetime as dt
 
 log = logging.getLogger(__name__)
 
