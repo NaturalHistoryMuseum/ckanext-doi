@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # encoding: utf-8
 #
 # This file is part of ckanext-doi
@@ -6,41 +6,47 @@
 
 from setuptools import find_packages, setup
 
-__version__ = u'2.0.2'
+__version__ = '3.0.0'
 
-with open(u'README.md', u'r') as f:
+with open('README.md', 'r') as f:
     __long_description__ = f.read()
 
 setup(
-    name=u'ckanext-doi',
+    name='ckanext-doi',
     version=__version__,
-    description=u'A CKAN extension for assigning a digital object identifier (DOI) to datasets, using the DataCite DOI service.',
+    description='A CKAN extension for assigning a digital object identifier (DOI) to datasets, '
+                'using the DataCite DOI service.',
     long_description=__long_description__,
     classifiers=[
-        u'Development Status :: 3 - Alpha',
-        u'Framework :: Flask',
-        u'Programming Language :: Python :: 2.7'
+        'Development Status :: 5 - Production/Stable',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3 :: Only',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
-    keywords=u'CKAN data doi',
-    author=u'Natural History Museum',
-    author_email=u'data@nhm.ac.uk',
-    url=u'https://github.com/NaturalHistoryMuseum/ckanext-doi',
-    license=u'GNU GPLv3',
-    packages=find_packages(exclude=[u'tests']),
-    namespace_packages=[u'ckanext', u'ckanext.doi'],
+    keywords='CKAN data doi',
+    author='Natural History Museum',
+    author_email='data@nhm.ac.uk',
+    url='https://github.com/NaturalHistoryMuseum/ckanext-doi',
+    license='GNU GPLv3',
+    packages=find_packages(exclude=['tests']),
+    namespace_packages=['ckanext', 'ckanext.doi'],
     include_package_data=True,
     zip_safe=False,
     install_requires=[
+        # force the base same version as ckan (the datacite github repo installs a higher version)
+        'lxml~=4.4.0',
         'requests',
-        'xmltodict==0.9.0',
-        'jsonschema==3.0.0'
-        ],
+        'xmltodict==0.12.0',
+        'jsonschema==3.0.0',
+        # force the same base version as ckan
+        'python-dateutil~=2.8.0',
+    ],
     entry_points= \
-        u'''
+        '''
         [ckan.plugins]
             doi=ckanext.doi.plugin:DOIPlugin
-
-        [paste.paster_command]
-            doi=ckanext.doi.commands.doi:DOICommand
         ''',
-    )
+)

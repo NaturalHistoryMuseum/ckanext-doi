@@ -1,19 +1,16 @@
-dist: trusty
+sudo: required
+
 language: python
 
-python:
-  - "2.7"
-
-install:
-  - sh ckanext/doi/tests/bin/build.sh
-
 services:
-  - redis-server
-  - postgresql
+  - docker
 
-addons:
-  postgresql: "9.4"
+# we need coveralls and this also prevents travis from running pip install -r requirements.txt
+install: pip install coveralls
 
-script: coverage run --source=ckanext.doi setup.py nosetests --ckan --with-pylons=ckanext/doi/tests/bin/test.ini --nologcapture --debug=ckantest,ckanext.doi --rednose
+script:
+  - docker-compose build
+  - docker-compose run ckan
 
 after_success: coveralls
+

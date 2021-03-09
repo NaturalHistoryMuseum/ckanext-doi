@@ -1,14 +1,15 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # encoding: utf-8
 #
 # This file is part of ckanext-doi
 # Created by the Natural History Museum in London, UK
 
 from ckan.model import Session
+
 from ckanext.doi.model.doi import DOI, doi_table
 
 
-class DOIQuery(object):
+class DOIQuery:
     # convenience properties
     m = DOI
     cols = [c.name for c in doi_table.c]
