@@ -126,9 +126,8 @@ class DataciteClient:
             'identifier': doi
         }
 
-        # use an assert here because the data should be valid every time, otherwise it's
-        # something the developer is going to have to fix
-        assert schema42.validate(xml_dict)
+        # check that the data is valid, this will raise a JSON schema exception if there are issues
+        schema42.validator.validate(xml_dict)
 
         xml_doc = schema42.tostring(xml_dict)
         # create the metadata on datacite
