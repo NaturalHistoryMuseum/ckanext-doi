@@ -16,7 +16,7 @@ def create_contributor(full_name=None, family_name=None, given_name=None, is_org
     :param family_name: family name of the creator; will be ignored if given_name is None
     :param given_name: given name(s) or initials of the creator; will be ignored if
     family_name is None
-    :param is_org: sets name type to Organization if true
+    :param is_org: sets name type to Organizational if true
     :param contributor_type: the contributor type to set
     :param affiliations: affiliations of the contributor, either a string or list of strings
     :return: a dict
@@ -41,7 +41,7 @@ def create_contributor(full_name=None, family_name=None, given_name=None, is_org
             given_name = ' '.join(name_parts[0:-1]).strip()
     person = {
         'name': full_name,
-        'nameType': 'Organization' if is_org else 'Personal'
+        'nameType': 'Organizational' if is_org else 'Personal'
     }
     if not is_org:
         person['familyName'] = family_name
