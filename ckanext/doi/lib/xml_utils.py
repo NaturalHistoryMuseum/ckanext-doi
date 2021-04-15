@@ -21,12 +21,14 @@ def create_contributor(full_name=None, family_name=None, given_name=None, is_org
     :param affiliations: affiliations of the contributor, either a string or list of strings
     :return: a dict
     '''
+    if is_org and full_name is None:
+        raise ValueError('Creator name must be supplied as full_name="Org Name"')
     if full_name is None and (family_name is None or given_name is None):
         raise ValueError('Creator name must be supplied, either as full_name="FamilyName, '
                          'GivenName" or separately as family_name and given_name')
     if full_name is None:
         full_name = f'{family_name}, {given_name}'
-    if family_name is None or given_name is None:
+    if (family_name is None or given_name is None) and not is_org:
         # try to extract the family and given names from the full name
         name_parts = full_name.split(',', 1)
         if len(name_parts) > 1:
@@ -39,10 +41,11 @@ def create_contributor(full_name=None, family_name=None, given_name=None, is_org
             given_name = ' '.join(name_parts[0:-1]).strip()
     person = {
         'name': full_name,
-        'familyName': family_name,
-        'givenName': given_name,
         'nameType': 'Organization' if is_org else 'Personal'
     }
+    if not is_org:
+        person['familyName'] = family_name
+        person['givenName'] = given_name
     if contributor_type is not None:
         person['contributorType'] = contributor_type
     if affiliations is not None:
