@@ -6,7 +6,7 @@
 
 
 def create_contributor(full_name=None, family_name=None, given_name=None, is_org=False,
-                       contributor_type=None, affiliations=None):
+                       contributor_type=None, affiliations=None, identifiers=None):
     '''
     Create a dictionary representation of a contributing entity (either a person or an
     organisation) for use in an xml_dict.
@@ -19,6 +19,7 @@ def create_contributor(full_name=None, family_name=None, given_name=None, is_org
     :param is_org: sets name type to Organizational if true
     :param contributor_type: the contributor type to set
     :param affiliations: affiliations of the contributor, either a string or list of strings
+    :param identifiers: a list of dicts with "identifier", "scheme", and (optionally) "scheme_uri"
     :return: a dict
     '''
     if is_org and full_name is None:
@@ -39,19 +40,29 @@ def create_contributor(full_name=None, family_name=None, given_name=None, is_org
             name_parts = full_name.split(' ')
             family_name = name_parts[-1].strip()
             given_name = ' '.join(name_parts[0:-1]).strip()
-    person = {
+    contributor = {
         'name': full_name,
         'nameType': 'Organizational' if is_org else 'Personal'
     }
     if not is_org:
-        person['familyName'] = family_name
-        person['givenName'] = given_name
+        contributor['familyName'] = family_name
+        contributor['givenName'] = given_name
     if contributor_type is not None:
-        person['contributorType'] = contributor_type
+        contributor['contributorType'] = contributor_type
     if affiliations is not None:
-        person['affiliations'] = []
+        contributor['affiliations'] = []
         if isinstance(affiliations, str):
             affiliations = [affiliations]
         for affiliation in affiliations:
-            person['affiliations'].append({'affiliation': affiliation})
-    return person
+            contributor['affiliations'].append({'affiliation': affiliation})
+    if identifiers:
+        contributor['nameIdentifiers'] = []
+        for _id in identifiers:
+            if 'identifier' not in _id or 'scheme' not in _id:
+                continue
+            id_dict = {'nameIdentifier': _id['identifier'],
+                       'nameIdentifierScheme': _id['scheme']}
+            if 'scheme_uri' in _id:
+                id_dict['schemeUri'] = _id['scheme_uri']
+            contributor['nameIdentifiers'].append(id_dict)
+    return contributor
