@@ -1,8 +1,2 @@
 # install from setup.py
 .
-
-# dev overrides/additional libraries
-# schema42 not released on pypi, so get datacite lib from github (version number is the same), we
-# want this specific commit because it includes lxml>=4.3.5 which is compatible with ckan core's
-# required version
-git+https://github.com/inveniosoftware/datacite.git@454eed812eac77121fe8fd21ac26b8d60dc1d7d7

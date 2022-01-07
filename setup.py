@@ -36,13 +36,9 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        # force the base same version as ckan (the datacite github repo installs a higher version)
-        'lxml~=4.4.0',
-        'requests',
+        'datacite==1.1.2',
         'xmltodict==0.12.0',
         'jsonschema==3.0.0',
-        # force the same base version as ckan
-        'python-dateutil~=2.8.0',
     ],
     entry_points= \
         '''
