@@ -121,10 +121,10 @@ class DataciteClient:
         :param xml_dict: the metadata as an xml dict (generated from build_xml_dict)
         :return:
         '''
-        xml_dict['identifier'] = {
+        xml_dict['identifiers'] = [{
             'identifierType': 'DOI',
             'identifier': doi
-        }
+        }]
 
         # check that the data is valid, this will raise a JSON schema exception if there are issues
         schema42.validator.validate(xml_dict)
