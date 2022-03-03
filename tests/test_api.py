@@ -138,7 +138,7 @@ class TestMintNewDOI(object):
         mock_crud.read_package = MagicMock(return_value=None)
 
         api = DataciteClient()
-        doi = constants.XML_DICT['identifier']['identifier']
+        doi = constants.XML_DICT['identifiers'][0]['identifier']
         pkg_id = MagicMock()
 
         with pytest.raises(DataCiteError):
@@ -152,7 +152,7 @@ class TestMintNewDOI(object):
         mock_crud.read_package = MagicMock(return_value=None)
 
         api = DataciteClient()
-        doi = constants.XML_DICT['identifier']['identifier']
+        doi = constants.XML_DICT['identifiers'][0]['identifier']
         pkg_id = MagicMock()
 
         api.set_metadata(doi, constants.XML_DICT)
@@ -167,7 +167,7 @@ class TestMintNewDOI(object):
         mock_crud.read_package = MagicMock(return_value=None)
 
         api = DataciteClient()
-        doi = constants.XML_DICT['identifier']['identifier']
+        doi = constants.XML_DICT['identifiers'][0]['identifier']
         pkg_id = MagicMock()
 
         api.set_metadata(doi, constants.XML_DICT)
@@ -182,7 +182,7 @@ class TestMintNewDOI(object):
         mock_crud.read_package = MagicMock(return_value=MagicMock())
 
         api = DataciteClient()
-        doi = constants.XML_DICT['identifier']['identifier']
+        doi = constants.XML_DICT['identifiers'][0]['identifier']
         pkg_id = MagicMock()
 
         api.set_metadata(doi, constants.XML_DICT)
@@ -197,7 +197,7 @@ class TestMintNewDOI(object):
         mock_crud.read_package = MagicMock(return_value=MagicMock())
 
         api = DataciteClient()
-        doi = constants.XML_DICT['identifier']['identifier']
+        doi = constants.XML_DICT['identifiers'][0]['identifier']
         pkg_id = MagicMock()
 
         api.set_metadata(doi, constants.XML_DICT)

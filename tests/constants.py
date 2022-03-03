@@ -116,10 +116,10 @@ METADATA_DICT = {
 
 # minimal example from https://datacite.readthedocs.io/en/latest
 XML_DICT = {
-    'identifier': {
+    'identifiers': [{
         'identifierType': 'DOI',
         'identifier': '10.4124/abcd1234',
-    },
+    }],
     'creators': [
         {
             'name': 'Smith, John'
