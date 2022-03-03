@@ -135,12 +135,12 @@ You will need a development/test account to use this plugin in test mode, and a 
 
 1. `delete-dois`: delete all DOIs from the database (_not_ datacite).
     ```bash
-    paster --plugin=ckanext-doi doi delete-dois -c $CONFIG_FILE
+    ckan -c $CONFIG_FILE doi delete-dois
     ```
 
 2. `update-doi`: update the datacite metadata for one or all packages.
     ```bash
-    paster --plugin=ckanext-doi doi update-doi [PACKAGE_ID] -c $CONFIG_FILE
+    ckan -c $CONFIG_FILE doi update-doi [PACKAGE_ID]
     ```
 
 ## Interfaces
