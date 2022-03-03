@@ -81,6 +81,12 @@ Path variables used below:
   ckan.plugins = ... doi
   ```
 
+6. Initialize the database
+
+ ```bash
+ ckan -c $CONFIG_FILE doi initdb
+ ```
+
 
 # Configuration
 
