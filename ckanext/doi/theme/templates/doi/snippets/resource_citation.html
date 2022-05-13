@@ -9,22 +9,22 @@ Renders a citation for a resource
         <div class="module-content citation">
             <h3>{{ _('Cite this as') }}</h3>
 
-
-                {% set site_title = h.get_site_title() %}
-                <p>
-                    {{ pkg_dict['author'] }} ({{ h.package_get_year(pkg_dict) }}). Dataset: {{ pkg_dict['title'] }}. Resource: {{ res['name'] }}.
-                    {% if site_title %}
-                        {{ site_title }}.
-                    {% endif %}
+            <div id="citation-string" class="citation-string">
+                {% block default_citation_string %}
+                {{ pkg_dict['author'] }} ({{ h.package_get_year(pkg_dict) }}). <i>{{ res['name'] }}</i> (from <i>{{ pkg_dict['title'] }}</i>) [Data set resource]. {{ pkg_dict['doi_publisher'] }}.
                 {% block citation_link %}
-                    {{ super() }}
+                    {% set res_link = h.url_for('resource.view', qualified=True, id=pkg_dict['name'], resource_id=res['id'], view=None) %}
+                    <a href="{{ res_link }}" target="_blank">
+                        {{ res_link }}
+                    </a>
                 {% endblock %}
-                </p>
+                {% endblock %}
+            </div>
 
+            {% set include_bibtex_link = False %}
             {% block citation_status %}
                 {{ super() }}
             {% endblock %}
-
         </div>
     </section>
 {% endblock %}
