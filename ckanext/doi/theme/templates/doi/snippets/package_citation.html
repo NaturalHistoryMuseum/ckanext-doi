@@ -20,7 +20,6 @@ Renders a citation for a package
             {% endblock %}
         </div>
 
-        {% set include_bibtex_link = True %}
         {% block citation_status %}
         <div id="citation-status">
             {% if not pkg_dict['doi_status'] %}
@@ -45,7 +44,7 @@ Renders a citation for a package
                     Retrieved: {{ h.render_datetime(h.now(), date_format='%H:%M %d %b %Y (%Z)') }}
                 </small>
             </div>
-            {% if include_bibtex_link %}
+            {% if not res %}
             <div>
                 {% set datacite_url = 'api.test.datacite.org' if config.get('ckanext.doi.test_mode', config.get('DEBUG', True)) else 'api.datacite.org' %}
                 <a class="btn btn-mini" title="Download BibTeX" href="https://{{ datacite_url }}/dois/application/x-bibtex/{{ pkg_dict['doi'] }}">
