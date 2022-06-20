@@ -13,7 +13,7 @@ Renders a citation for a resource
                 {% block default_citation_string %}
                 {{ pkg_dict['author'] }} ({{ h.package_get_year(pkg_dict) }}). <i>{{ res['name'] }}</i> (from <i>{{ pkg_dict['title'] }}</i>) [Data set resource]. {{ pkg_dict['doi_publisher'] }}.
                 {% block citation_link %}
-                    {% set res_link = h.url_for('resource.view', qualified=True, id=pkg_dict['name'], resource_id=res['id'], view=None) %}
+                    {% set res_link = h.url_for('resource.read', qualified=True, id=pkg_dict['name'], resource_id=res['id']) %}
                     <a href="{{ res_link }}" target="_blank">
                         {{ res_link }}
                     </a>
