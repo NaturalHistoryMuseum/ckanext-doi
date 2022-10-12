@@ -1,7 +1,7 @@
-FROM openknowledge/ckan-dev:2.9
+FROM naturalhistorymuseum/ckantest:0.1
 
-# ckan is installed in /srv/app/src/ckan in the ckan-dev image we're basing this image on
-WORKDIR /srv/app/src/ckanext-doi
+# ckan is installed in /base/src/ckan in the ckan-dev image we're basing this image on
+WORKDIR /base/src/ckanext-doi
 
 # copy over the ckanext-doi source
 COPY . .
@@ -19,7 +19,7 @@ RUN python3 setup.py develop && \
 
 # this entrypoint ensures our service dependencies (postgresql, solr and redis) are running before
 # running the cmd
-ENTRYPOINT ["/bin/bash", "docker/entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "/opt/waits/basic.sh"]
 
 # run the tests with coverage output
 CMD ["pytest", "--cov=ckanext.doi", "--ckan-ini=test.ini", "tests"]
