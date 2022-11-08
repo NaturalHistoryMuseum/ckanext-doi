@@ -16,37 +16,43 @@ class DOIQuery:
 
     @classmethod
     def create(cls, identifier, package_id, published=None):
-        '''
+        """
         Create a new record in the DOI table.
+
         :param identifier: a new DOI string
         :param package_id: the id of the package this DOI represents
         :param published: when this DOI was published (datetime, nullable)
         :return: the newly created record object
-        '''
-        new_record = DOI(identifier=identifier, package_id=package_id, published=published)
+        """
+        new_record = DOI(
+            identifier=identifier, package_id=package_id, published=published
+        )
         Session.add(new_record)
         Session.commit()
         return new_record
 
     @classmethod
     def read_doi(cls, identifier):
-        '''
+        """
         Retrieve a record with a given DOI.
+
         :param identifier: the DOI string
         :return: the record object
-        '''
+        """
         return Session.query(DOI).get(identifier)
 
     @classmethod
     def read_package(cls, package_id, create_if_none=False):
-        '''
+        """
         Retrieve a record associated with a given package.
+
         :param package_id: the id of the package
         :param create_if_none: generate a new DOI and add a record if no record is found for the
                                given package
         :return: the record object
-        '''
+        """
         from ckanext.doi.lib.api import DataciteClient
+
         record = Session.query(DOI).filter(DOI.package_id == package_id).first()
         if record is None and create_if_none:
             client = DataciteClient()
@@ -56,12 +62,13 @@ class DOIQuery:
 
     @classmethod
     def update_doi(cls, identifier, **kwargs):
-        '''
+        """
         Update the package_id and/or published fields of a record with a given DOI.
+
         :param identifier: the DOI string
         :param kwargs: the values to be updated
         :return: the updated record object
-        '''
+        """
         update_dict = {k: v for k, v in kwargs.items() if k in cls.cols}
         Session.query(DOI).filter(DOI.identifier == identifier).update(update_dict)
         Session.commit()
@@ -69,12 +76,14 @@ class DOIQuery:
 
     @classmethod
     def update_package(cls, package_id, **kwargs):
-        '''
-        Update the package_id and/or published fields of a record associated with a given package.
+        """
+        Update the package_id and/or published fields of a record associated with a
+        given package.
+
         :param package_id: the id of the package
         :param kwargs: the values to be updated
         :return: the updated record object
-        '''
+        """
         update_dict = {k: v for k, v in kwargs.items() if k in cls.cols}
         Session.query(DOI).filter(DOI.package_id == package_id).update(update_dict)
         Session.commit()
@@ -82,11 +91,12 @@ class DOIQuery:
 
     @classmethod
     def delete_doi(cls, identifier):
-        '''
+        """
         Delete the record with a given DOI.
+
         :param identifier: the DOI string
         :return: True if a record was deleted, False if not
-        '''
+        """
         to_delete = cls.read_doi(identifier)
         if to_delete is not None:
             Session.delete(to_delete)
@@ -97,11 +107,12 @@ class DOIQuery:
 
     @classmethod
     def delete_package(cls, package_id):
-        '''
+        """
         Delete the record associated with a given package.
+
         :param package_id: the id of the package
         :return: True if a record was deleted, False if not
-        '''
+        """
         to_delete = cls.read_package(package_id)
         if to_delete is not None:
             Session.delete(to_delete)

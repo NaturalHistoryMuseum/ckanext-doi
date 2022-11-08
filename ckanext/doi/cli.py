@@ -23,7 +23,9 @@ def doi():
 @doi.command(name='initdb')
 def init_db():
     if not model.package_table.exists():
-        click.secho('Package table must exist before initialising the DOI table', fg='red')
+        click.secho(
+            'Package table must exist before initialising the DOI table', fg='red'
+        )
         raise click.Abort()
 
     if doi_model.doi_table.exists():
@@ -35,11 +37,12 @@ def init_db():
 
 @doi.command(name='delete-dois')
 def delete_dois():
-    '''
+    """
     Delete all DOIs from the database.
-    '''
+    """
     to_delete = Session.query(DOI).filter(
-        DOI.identifier.like(f'%{DataciteClient.get_prefix()}%'))
+        DOI.identifier.like(f'%{DataciteClient.get_prefix()}%')
+    )
     doi_count = to_delete.count()
     if doi_count == 0:
         click.secho('Nothing to delete', fg='green')
@@ -51,11 +54,13 @@ def delete_dois():
 
 
 @doi.command(name='update-doi')
-@click.option('-p', '--package_id', 'package_ids', multiple=True, help='Package id(s) to update')
+@click.option(
+    '-p', '--package_id', 'package_ids', multiple=True, help='Package id(s) to update'
+)
 def update_doi(package_ids):
-    '''
+    """
     Update either all DOIs in the system or the ones associated with the given packages.
-    '''
+    """
     if not package_ids:
         dois_to_update = Session.query(DOI).all()
     else:
@@ -66,15 +71,17 @@ def update_doi(package_ids):
         return
 
     for record in dois_to_update:
-        pkg_dict = toolkit.get_action('package_show')({}, {
-            'id': record.package_id
-        })
+        pkg_dict = toolkit.get_action('package_show')({}, {'id': record.package_id})
         title = pkg_dict.get('title', record.package_id)
 
         if record.published is None:
-            click.secho(f'"{title}" does not have a published DOI; ignoring', fg='yellow')
+            click.secho(
+                f'"{title}" does not have a published DOI; ignoring', fg='yellow'
+            )
             continue
-        if pkg_dict.get('state', 'active') != 'active' or pkg_dict.get('private', False):
+        if pkg_dict.get('state', 'active') != 'active' or pkg_dict.get(
+            'private', False
+        ):
             click.secho(f'"{title}" is inactive or private; ignoring', fg='yellow')
             continue
 
@@ -89,7 +96,9 @@ def update_doi(package_ids):
                 client.set_metadata(record.identifier, xml_dict)
                 click.secho(f'Updated "{title}"', fg='green')
             except DataCiteError as e:
-                click.secho(f'Error while updating "{title}" (DOI {record.identifier}): {e})',
-                            fg='red')
+                click.secho(
+                    f'Error while updating "{title}" (DOI {record.identifier}): {e})',
+                    fg='red',
+                )
         else:
             click.secho(f'"{title}" is already up to date', fg='green')

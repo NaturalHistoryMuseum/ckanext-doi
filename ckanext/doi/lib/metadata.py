@@ -19,10 +19,11 @@ log = logging.getLogger(__name__)
 
 
 def build_metadata_dict(pkg_dict):
-    '''
+    """
     Build/extract a basic dict of metadata that can then be passed to build_xml_dict.
+
     :param pkg_dict: dict of package details
-    '''
+    """
     metadata_dict = {}
 
     # collect errors instead of throwing them immediately; some data may not be correctly handled
@@ -35,7 +36,7 @@ def build_metadata_dict(pkg_dict):
         'titles': [],
         'publisher': None,
         'publicationYear': None,
-        'resourceType': None
+        'resourceType': None,
     }
 
     def _add_required(key, get_func):
@@ -45,14 +46,10 @@ def build_metadata_dict(pkg_dict):
             errors[key] = e
 
     # CREATORS
-    _add_required('creators', lambda: [{
-        'full_name': pkg_dict.get('author')
-    }])
+    _add_required('creators', lambda: [{'full_name': pkg_dict.get('author')}])
 
     # TITLES
-    _add_required('titles', lambda: [{
-        'title': pkg_dict.get('title')
-    }])
+    _add_required('titles', lambda: [{'title': pkg_dict.get('title')}])
 
     # PUBLISHER
     _add_required('publisher', lambda: toolkit.config.get('ckanext.doi.publisher'))
@@ -77,15 +74,20 @@ def build_metadata_dict(pkg_dict):
         'rightsList': [],
         'descriptions': [],
         'geolocations': [],
-        'fundingReferences': []
+        'fundingReferences': [],
     }
 
     # SUBJECTS
     # use the tag list
     try:
         tags = pkg_dict.get('tag_string', '').split(',')
-        tags += [tag['name'] if isinstance(tag, dict) else tag for tag in pkg_dict.get('tags', [])]
-        optional['subjects'] = [{'subject': tag} for tag in sorted({t for t in tags if t != ''})]
+        tags += [
+            tag['name'] if isinstance(tag, dict) else tag
+            for tag in pkg_dict.get('tags', [])
+        ]
+        optional['subjects'] = [
+            {'subject': tag} for tag in sorted({t for t in tags if t != ''})
+        ]
     except Exception as e:
         errors['subjects'] = e
 
@@ -97,39 +99,42 @@ def build_metadata_dict(pkg_dict):
     maintainer = pkg_dict.get('maintainer')
     if author is not None:
         optional['contributors'].append(
-            {
-                'contributor_type': 'Researcher',
-                'full_name': author
-            })
+            {'contributor_type': 'Researcher', 'full_name': author}
+        )
     if maintainer is not None:
-        optional['contributors'].append({
-            'contributor_type': 'DataManager',
-            'full_name': maintainer
-        })
+        optional['contributors'].append(
+            {'contributor_type': 'DataManager', 'full_name': maintainer}
+        )
 
     # DATES
     # created, updated, and doi publish date
     date_errors = {}
     try:
-        optional['dates'].append({
-            'dateType': 'Created',
-            'date': date_or_none(pkg_dict.get('metadata_created'))
-        })
+        optional['dates'].append(
+            {
+                'dateType': 'Created',
+                'date': date_or_none(pkg_dict.get('metadata_created')),
+            }
+        )
     except Exception as e:
         date_errors['created'] = e
     try:
-        optional['dates'].append({
-            'dateType': 'Updated',
-            'date': date_or_none(pkg_dict.get('metadata_modified'))
-        })
+        optional['dates'].append(
+            {
+                'dateType': 'Updated',
+                'date': date_or_none(pkg_dict.get('metadata_modified')),
+            }
+        )
     except Exception as e:
         date_errors['updated'] = e
     if 'doi_date_published' in pkg_dict:
         try:
-            optional['dates'].append({
-                'dateType': 'Issued',
-                'date': date_or_none(pkg_dict.get('doi_date_published'))
-            })
+            optional['dates'].append(
+                {
+                    'dateType': 'Issued',
+                    'date': date_or_none(pkg_dict.get('doi_date_published')),
+                }
+            )
         except Exception as e:
             date_errors['doi_date_published'] = e
 
@@ -144,10 +149,9 @@ def build_metadata_dict(pkg_dict):
     # add permalink back to this site
     try:
         permalink = f'{get_site_url()}/dataset/{pkg_dict["id"]}'
-        optional['alternateIdentifiers'] = [{
-            'alternateIdentifierType': 'URL',
-            'alternateIdentifier': permalink
-        }]
+        optional['alternateIdentifiers'] = [
+            {'alternateIdentifierType': 'URL', 'alternateIdentifier': permalink}
+        ]
     except Exception as e:
         errors['alternateIdentifiers'] = e
 
@@ -157,7 +161,9 @@ def build_metadata_dict(pkg_dict):
     # SIZES
     # sum up given sizes from resources in the package and convert from bytes to kilobytes
     try:
-        resource_sizes = [r.get('size') or 0 for r in pkg_dict.get('resources', []) or []]
+        resource_sizes = [
+            r.get('size') or 0 for r in pkg_dict.get('resources', []) or []
+        ]
         total_size = [f'{int(sum(resource_sizes) / 1024)} kb']
         optional['sizes'] = total_size
     except Exception as e:
@@ -167,7 +173,12 @@ def build_metadata_dict(pkg_dict):
     # list unique formats from package resources
     try:
         formats = list(
-            set(filter(None, [r.get('format') for r in pkg_dict.get('resources', []) or []])))
+            set(
+                filter(
+                    None, [r.get('format') for r in pkg_dict.get('resources', []) or []]
+                )
+            )
+        )
         optional['formats'] = formats
     except Exception as e:
         errors['formats'] = e
@@ -185,10 +196,7 @@ def build_metadata_dict(pkg_dict):
             license = license_register.get(license_id)
             if license is not None:
                 optional['rightsList'] = [
-                    {
-                        'url': license.url,
-                        'identifier': license.id
-                    }
+                    {'url': license.url, 'identifier': license.id}
                 ]
     except Exception as e:
         errors['rightsList'] = e
@@ -196,10 +204,7 @@ def build_metadata_dict(pkg_dict):
     # DESCRIPTIONS
     # use package notes
     optional['descriptions'] = [
-        {
-            'descriptionType': 'Other',
-            'description': pkg_dict.get('notes', '')
-        }
+        {'descriptionType': 'Other', 'description': pkg_dict.get('notes', '')}
     ]
 
     # GEOLOCATIONS
@@ -214,7 +219,9 @@ def build_metadata_dict(pkg_dict):
     for plugin in PluginImplementations(IDoi):
         # implementations should remove relevant errors from the errors dict if they successfully
         # handle an item
-        metadata_dict, errors = plugin.build_metadata_dict(pkg_dict, metadata_dict, errors)
+        metadata_dict, errors = plugin.build_metadata_dict(
+            pkg_dict, metadata_dict, errors
+        )
 
     for k in required:
         if metadata_dict.get(k) is None and errors.get(k) is None:
@@ -222,8 +229,10 @@ def build_metadata_dict(pkg_dict):
 
     required_errors = {k: e for k, e in errors.items() if k in required}
     if len(required_errors) > 0:
-        error_msg = f'Could not extract metadata for the following required keys: ' \
-                    f'{", ".join(required_errors)}'
+        error_msg = (
+            f'Could not extract metadata for the following required keys: '
+            f'{", ".join(required_errors)}'
+        )
         log.exception(error_msg)
         for k, e in required_errors.items():
             log.exception(f'{k}: {e}')
@@ -231,8 +240,10 @@ def build_metadata_dict(pkg_dict):
 
     optional_errors = {k: e for k, e in errors.items() if k in optional}
     if len(required_errors) > 0:
-        error_msg = f'Could not extract metadata for the following optional keys: ' \
-                    f'{", ".join(optional_errors)}'
+        error_msg = (
+            f'Could not extract metadata for the following optional keys: '
+            f'{", ".join(optional_errors)}'
+        )
         log.debug(error_msg)
         for k, e in optional_errors.items():
             log.debug(f'{k}: {e}')
@@ -241,13 +252,15 @@ def build_metadata_dict(pkg_dict):
 
 
 def build_xml_dict(metadata_dict):
-    '''
-    Builds a dictionary that can be passed directly to datacite.schema42.tostring() to generate xml.
-    Previously named metadata_to_xml but renamed as it's not actually producing any xml,
-    it's just formatting the metadata so a separate function can then generate the xml.
+    """
+    Builds a dictionary that can be passed directly to datacite.schema42.tostring() to
+    generate xml. Previously named metadata_to_xml but renamed as it's not actually
+    producing any xml, it's just formatting the metadata so a separate function can then
+    generate the xml.
+
     :param metadata_dict: a dict of metadata generated from build_metadata_dict
     :return: dict that can be passed directly to datacite.schema42.tostring()
-    '''
+    """
 
     # required fields first (DOI will be added later)
     xml_dict = {
@@ -257,7 +270,7 @@ def build_xml_dict(metadata_dict):
         'publicationYear': str(metadata_dict.get('publicationYear')),
         'types': {
             'resourceType': metadata_dict.get('resourceType'),
-            'resourceTypeGeneral': 'Dataset'
+            'resourceTypeGeneral': 'Dataset',
         },
         'schemaVersion': 'http://datacite.org/schema/kernel-4',
     }
@@ -278,7 +291,7 @@ def build_xml_dict(metadata_dict):
         'rightsList',
         'descriptions',
         'geolocations',
-        'fundingReferences'
+        'fundingReferences',
     ]
 
     for k in optional:
@@ -292,7 +305,9 @@ def build_xml_dict(metadata_dict):
         if k == 'contributors':
             xml_dict['contributors'] = []
             for contributor in v:
-                xml_dict['contributors'].append(xml_utils.create_contributor(**contributor))
+                xml_dict['contributors'].append(
+                    xml_utils.create_contributor(**contributor)
+                )
         elif k == 'dates':
             item = []
             for date_entry in v:

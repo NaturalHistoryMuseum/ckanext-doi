@@ -14,9 +14,9 @@ from ckanext.doi.model.doi import DOI, doi_table
 
 @pytest.fixture
 def with_doi_table(reset_db):
-    '''
+    """
     Simple fixture which resets the database and creates the doi table.
-    '''
+    """
     reset_db()
     doi_table.create(checkfirst=True)
 
@@ -29,7 +29,8 @@ def with_doi_table(reset_db):
 def test_doi_is_created_automatically(mock_client):
     # this test ensures that when a package is created, a DOI is created
     mock_client.return_value = MagicMock(
-        metadata_get=MagicMock(side_effect=DataCiteNotFoundError()))
+        metadata_get=MagicMock(side_effect=DataCiteNotFoundError())
+    )
     package = factories.Dataset()
     found_record = Session.query(DOI).filter(DOI.package_id == package['id']).one()
     assert found_record is not None
