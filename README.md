@@ -2,10 +2,11 @@
 
 # ckanext-doi
 
-[![Tests](https://github.com/NaturalHistoryMuseum/ckanext-doi/actions/workflows/main.yml/badge.svg)](https://github.com/NaturalHistoryMuseum/ckanext-doi/actions/workflows/main.yml)
-[![Coveralls](https://img.shields.io/coveralls/github/NaturalHistoryMuseum/ckanext-doi/master.svg?style=flat-square)](https://coveralls.io/github/NaturalHistoryMuseum/ckanext-doi)
+[![Tests](https://img.shields.io/github/workflow/status/NaturalHistoryMuseum/ckanext-doi/Tests?style=flat-square)](https://github.com/NaturalHistoryMuseum/ckanext-doi/actions/workflows/main.yml)
+[![Coveralls](https://img.shields.io/coveralls/github/NaturalHistoryMuseum/ckanext-doi/main?style=flat-square)](https://coveralls.io/github/NaturalHistoryMuseum/ckanext-doi)
 [![CKAN](https://img.shields.io/badge/ckan-2.9.1-orange.svg?style=flat-square)](https://github.com/ckan/ckan)
 [![Python](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue.svg?style=flat-square)](https://www.python.org/)
+[![Docs](https://img.shields.io/readthedocs/ckanext-doi?style=flat-square)](https://ckanext-doi.readthedocs.io)
 
 _A CKAN extension for assigning a digital object identifier (DOI) to datasets, using the DataCite DOI service._
 
@@ -90,7 +91,7 @@ Path variables used below:
 
 # Configuration
 
-There are a number of options that can be specified in your .ini config file.
+These are the options that can be specified in your .ini config file.
 
 ## DateCite Credentials **[REQUIRED]**
 
@@ -195,16 +196,13 @@ Parameter|Description
 
 
 # Testing
-_Test coverage is currently extremely limited._
 
-To run the tests in this extension, there is a Docker compose configuration available in this
-repository to make it easy.
+There is a Docker compose configuration available in this repository to make it easier to run tests.
 
 To run the tests against ckan 2.9.x on Python3:
 
 1. Build the required images
 ```bash
-# first build the containers
 docker-compose build
 ```
 
@@ -216,7 +214,6 @@ docker-compose build
 docker-compose run ckan
 ```
 
-The ckan image uses the Dockerfile in the `docker/` folder which is based on `openknowledge/ckan-dev:2.9`.
-
+The ckan image uses the Dockerfile in the `docker/` folder.
 Note that currently the tests mock the Datacite API and therefore don't require an internet
 connection nor your Datacite credentials to run.
