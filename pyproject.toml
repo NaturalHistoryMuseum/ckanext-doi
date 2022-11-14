@@ -38,7 +38,7 @@ repository = "https://github.com/NaturalHistoryMuseum/ckanext-doi"
 changelog = "https://github.com/NaturalHistoryMuseum/ckanext-doi/blob/main/CHANGELOG.md"
 
 [project.entry-points."ckan.plugins"]
-doi = "ckanext.doi.plugin:DoiPlugin"
+doi = "ckanext.doi.plugin:DOIPlugin"
 
 
 [build-system]
