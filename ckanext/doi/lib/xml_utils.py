@@ -5,9 +5,16 @@
 # Created by the Natural History Museum in London, UK
 
 
-def create_contributor(full_name=None, family_name=None, given_name=None, is_org=False,
-                       contributor_type=None, affiliations=None, identifiers=None):
-    '''
+def create_contributor(
+    full_name=None,
+    family_name=None,
+    given_name=None,
+    is_org=False,
+    contributor_type=None,
+    affiliations=None,
+    identifiers=None,
+):
+    """
     Create a dictionary representation of a contributing entity (either a person or an
     organisation) for use in an xml_dict.
 
@@ -21,12 +28,14 @@ def create_contributor(full_name=None, family_name=None, given_name=None, is_org
     :param affiliations: affiliations of the contributor, either a string or list of strings
     :param identifiers: a list of dicts with "identifier", "scheme", and (optionally) "scheme_uri"
     :return: a dict
-    '''
+    """
     if is_org and full_name is None:
         raise ValueError('Creator name must be supplied as full_name="Org Name"')
     if full_name is None and (family_name is None or given_name is None):
-        raise ValueError('Creator name must be supplied, either as full_name="FamilyName, '
-                         'GivenName" or separately as family_name and given_name')
+        raise ValueError(
+            'Creator name must be supplied, either as full_name="FamilyName, '
+            'GivenName" or separately as family_name and given_name'
+        )
     if full_name is None:
         full_name = f'{family_name}, {given_name}'
     if (family_name is None or given_name is None) and not is_org:
@@ -42,7 +51,7 @@ def create_contributor(full_name=None, family_name=None, given_name=None, is_org
             given_name = ' '.join(name_parts[0:-1]).strip()
     contributor = {
         'name': full_name,
-        'nameType': 'Organizational' if is_org else 'Personal'
+        'nameType': 'Organizational' if is_org else 'Personal',
     }
     if not is_org:
         contributor['familyName'] = family_name
@@ -60,8 +69,10 @@ def create_contributor(full_name=None, family_name=None, given_name=None, is_org
         for _id in identifiers:
             if 'identifier' not in _id or 'scheme' not in _id:
                 continue
-            id_dict = {'nameIdentifier': _id['identifier'],
-                       'nameIdentifierScheme': _id['scheme']}
+            id_dict = {
+                'nameIdentifier': _id['identifier'],
+                'nameIdentifierScheme': _id['scheme'],
+            }
             if 'scheme_uri' in _id:
                 id_dict['schemeUri'] = _id['scheme_uri']
             contributor['nameIdentifiers'].append(id_dict)

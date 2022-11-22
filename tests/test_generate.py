@@ -9,7 +9,7 @@ import pytest
 from datacite import schema42
 
 from ckanext.doi.lib.metadata import build_metadata_dict, build_xml_dict
-from . import constants
+from .helpers import constants
 
 
 @pytest.mark.ckan_config('ckanext.doi.publisher', 'Example Publisher')
@@ -30,10 +30,7 @@ def test_extracts_metadata():
 def test_handles_bad_data():
     bad_pkg_dict = {k: v for k, v in constants.PKG_DICT.items()}
     bad_pkg_dict['resources'] = None
-    bad_pkg_dict['author'] = {
-        'given_name': 'Test',
-        'family_name': 'Author'
-    }
+    bad_pkg_dict['author'] = {'given_name': 'Test', 'family_name': 'Author'}
     bad_pkg_dict['license_id'] = None
     build_metadata_dict(bad_pkg_dict)
 
@@ -47,8 +44,7 @@ def test_handles_bad_data():
 def test_generate_xml():
     xml_dict = build_xml_dict(constants.METADATA_DICT)
     # build_xml_dict does not add a DOI
-    xml_dict['identifiers'] = [{
-        'identifierType': 'DOI',
-        'identifier': '10.0000/this-would-be-a-doi'
-    }]
+    xml_dict['identifiers'] = [
+        {'identifierType': 'DOI', 'identifier': '10.0000/this-would-be-a-doi'}
+    ]
     assert schema42.validate(xml_dict)

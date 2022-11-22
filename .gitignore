@@ -1,10 +1,9 @@
-__pycache__/
-*.py[cod]
-*$py.class
-*.egg-info/
-pip-log.txt
-pip-delete-this-directory.txt
-htmlcov/
+*.egg-info
+*.pyc
+.noseids
+.pytest_cache
 .coverage
-.pytest_cache/
+build/
+dist/
 .idea
+**/node_modules/
