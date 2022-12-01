@@ -1,5 +1,12 @@
 # Changelog
 
+## v3.1.1 (2022-12-01)
+
+### Docs
+
+- **readme**: format test section
+- **readme**: update installation steps, add test mode details
+
 ## v3.1.0 (2022-11-28)
 
 ### Fix
