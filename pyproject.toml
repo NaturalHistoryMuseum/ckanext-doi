@@ -53,6 +53,9 @@ zip-safe = false
 [tool.setuptools.packages.find]
 exclude = ["tests", "docs"]
 
+[tool.setuptools.package-data]
+"ckanext.doi.theme" = ["*", "**/*"]
+
 [tool.commitizen]
 name = "cz_nhm"
 version = "3.1.1"
