@@ -54,7 +54,7 @@ zip-safe = false
 exclude = ["tests", "docs"]
 
 [tool.setuptools.package-data]
-"ckanext.doi.theme" = ["**/*"]
+"ckanext.doi.theme" = ["*", "**/*"]
 
 [tool.commitizen]
 name = "cz_nhm"
