@@ -1,4 +1,4 @@
-FROM naturalhistorymuseum/ckantest:0.2
+FROM naturalhistorymuseum/ckantest:latest
 
 WORKDIR /base/src/ckanext-doi
 
