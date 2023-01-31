@@ -1,5 +1,12 @@
 # Changelog
 
+## v3.1.4 (2023-01-31)
+
+### Docs
+
+- **readme**: direct link to logo in readme
+- **readme**: fix github actions badge
+
 ## v3.1.3 (2023-01-30)
 
 ### Build System(s)
