@@ -1,0 +1,19 @@
+name: Tests
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Build images
+        run: docker-compose build
+
+      - name: Run tests against next
+        run: docker-compose run -e COVERALLS_REPO_TOKEN next bash /opt/scripts/run-tests.sh -c ckanext.doi
