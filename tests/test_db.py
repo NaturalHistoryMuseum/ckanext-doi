@@ -3,22 +3,14 @@
 #
 # This file is part of ckanext-doi
 # Created by the Natural History Museum in London, UK
-import pytest
-from ckan.model import Session
-from ckan.tests import factories
-from datacite.errors import DataCiteNotFoundError
 from unittest.mock import patch, MagicMock
 
-from ckanext.doi.model.doi import DOI, doi_table
+import pytest
+from datacite.errors import DataCiteNotFoundError
 
-
-@pytest.fixture
-def with_doi_table(reset_db):
-    """
-    Simple fixture which resets the database and creates the doi table.
-    """
-    reset_db()
-    doi_table.create(checkfirst=True)
+from ckan.model import Session
+from ckan.tests import factories
+from ckanext.doi.model.doi import DOI
 
 
 @pytest.mark.filterwarnings('ignore::sqlalchemy.exc.SADeprecationWarning')
