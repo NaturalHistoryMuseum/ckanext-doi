@@ -5,7 +5,7 @@
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/NaturalHistoryMuseum/ckanext-doi/main.yml?style=flat-square)](https://github.com/NaturalHistoryMuseum/ckanext-doi/actions/workflows/main.yml)
 [![Coveralls](https://img.shields.io/coveralls/github/NaturalHistoryMuseum/ckanext-doi/main?style=flat-square)](https://coveralls.io/github/NaturalHistoryMuseum/ckanext-doi)
-[![CKAN](https://img.shields.io/badge/ckan-2.9.7-orange.svg?style=flat-square)](https://github.com/ckan/ckan)
+[![CKAN](https://img.shields.io/badge/ckan-2.9.9%20%7C%202.10.1-orange.svg?style=flat-square)](https://github.com/ckan/ckan)
 [![Python](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue.svg?style=flat-square)](https://www.python.org/)
 [![Docs](https://img.shields.io/readthedocs/ckanext-doi?style=flat-square)](https://ckanext-doi.readthedocs.io)
 
@@ -229,7 +229,7 @@ first, then the xml dict is passed through all the implementations of this metho
 <!--testing-start-->
 There is a Docker compose configuration available in this repository to make it easier to run tests. The ckan image uses the Dockerfile in the `docker/` folder.
 
-To run the tests against ckan 2.9.x on Python3:
+To run the tests can be run against ckan 2.9.x and 2.10.x on Python3:
 
 1. Build the required images:
    ```shell
@@ -241,7 +241,11 @@ To run the tests against ckan 2.9.x on Python3:
    configuration, so you should only need to rebuild the ckan image if you change the extension's
    dependencies.
    ```shell
-   docker-compose run ckan
+   # run tests against ckan 2.9.x
+   docker-compose run latest
+
+   # run tests against ckan 2.10.x
+   docker-compose run next
    ```
 
 Note that the tests mock the DataCite API and therefore don't require an internet connection nor
