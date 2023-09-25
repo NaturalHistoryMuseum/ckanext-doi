@@ -1,5 +1,26 @@
 # Changelog
 
+## v3.1.9 (2023-09-25)
+
+### Fix
+
+- add new functions to support CKAN 2.10
+
+### Docs
+
+- update docs with updated test info
+
+### Tests
+
+- add tests to confirm plugin CKAN 2.9/2.10 differences work ok
+- move with_doi_table fixture to conftest so others can use
+- add testing on ckan 2.10.x as well as 2.9.x
+
+### CI System(s)
+
+- switch back to a single workflow test file but with multiple jobs
+- run CI tests against ckan 2.9.x and 2.10.x
+
 ## v3.1.8 (2023-07-17)
 
 ### Docs
