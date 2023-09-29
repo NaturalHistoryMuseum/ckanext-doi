@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+title: CKAN Doi extension
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - name: Natural History Museum
+    city: London
+    country: GB
+    alias: NHM
+    email: data@nhm.ac.uk
+repository-code: 'https://github.com/NaturalHistoryMuseum/ckanext-doi'
+abstract: A CKAN extension for assigning a digital object identifier (DOI) to datasets, using the DataCite DOI service.
+keywords:
+  - ckan
+  - ckanext
+  - doi
+license: GPL-3.0-or-later
+version: 3.1.9
