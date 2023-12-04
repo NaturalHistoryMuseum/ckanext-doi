@@ -1,5 +1,25 @@
 # Changelog
 
+## v3.1.10 (2023-12-04)
+
+### Fix
+
+- update ckantools to patch bug with get_setting
+- add helper to correctly determine test mode status
+
+### Style
+
+- use single quotes
+
+### Chores/Misc
+
+- add regex for version line in citation file
+- add citation.cff to list of files with version
+- add contributing guidelines
+- add code of conduct
+- add citation file
+- update support.md links
+
 ## v3.1.9 (2023-09-25)
 
 ### Fix
