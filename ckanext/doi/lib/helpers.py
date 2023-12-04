@@ -8,6 +8,7 @@ from datetime import datetime
 
 import dateutil.parser as parser
 from ckan.plugins import toolkit
+from ckantools.config import get_debug, get_setting
 
 
 def package_get_year(pkg_dict):
@@ -56,3 +57,12 @@ def date_or_none(date_object_or_string):
         return parser.parse(date_object_or_string)
     else:
         return None
+
+
+def doi_test_mode():
+    """
+    Determines whether we're running in test mode.
+
+    :return: bool
+    """
+    return toolkit.asbool(get_setting('ckanext.doi.test_mode', default=get_debug()))

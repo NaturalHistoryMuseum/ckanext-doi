@@ -11,7 +11,12 @@ from ckan.plugins import SingletonPlugin, implements, interfaces, toolkit
 
 from ckanext.doi import cli
 from ckanext.doi.lib.api import DataciteClient
-from ckanext.doi.lib.helpers import get_site_title, get_site_url, package_get_year
+from ckanext.doi.lib.helpers import (
+    get_site_title,
+    get_site_url,
+    package_get_year,
+    doi_test_mode,
+)
 from ckanext.doi.lib.metadata import build_metadata_dict, build_xml_dict
 from ckanext.doi.model.crud import DOIQuery
 
@@ -133,4 +138,5 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
             "package_get_year": package_get_year,
             "now": datetime.now,
             "get_site_title": get_site_title,
+            "doi_test_mode": doi_test_mode,
         }
