@@ -16,6 +16,8 @@ from datacite import DataCiteMDSClient, schema42
 from datacite.errors import DataCiteError, DataCiteNotFoundError
 from datetime import datetime as dt
 
+from ckanext.doi.lib.helpers import doi_test_mode
+
 log = logging.getLogger(__name__)
 
 DEPRECATED_TEST_PREFIX = '10.5072'
@@ -49,7 +51,7 @@ class DataciteClient:
         :return: test mode enabled as boolean (true=enabled)
         """
         if self._test_mode is None:
-            self._test_mode = asbool(toolkit.config.get('ckanext.doi.test_mode', True))
+            self._test_mode = doi_test_mode()
         return self._test_mode
 
     @classmethod
