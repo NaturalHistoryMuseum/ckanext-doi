@@ -1,5 +1,15 @@
 # Changelog
 
+## v3.1.11 (2024-01-15)
+
+### Docs
+
+- update readme to clarify wording, fix links, and fix whitespace
+
+### Chores/Misc
+
+- add build section to read the docs config
+
 ## v3.1.10 (2023-12-04)
 
 ### Fix
