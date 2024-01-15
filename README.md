@@ -16,8 +16,7 @@ _A CKAN extension for assigning a digital object identifier (DOI) to datasets, u
 # Overview
 
 <!--overview-start-->
-This extension assigns a digital object identifier (DOI) to datasets, using the DataCite DOI
-service.
+This extension assigns a digital object identifier (DOI) to datasets, using the DataCite DOI service.
 
 When a new dataset is created it is assigned a new DOI. This DOI will be in the format:
 
@@ -25,18 +24,16 @@ When a new dataset is created it is assigned a new DOI. This DOI will be in the 
 
 If the new dataset is active and public, the DOI and metadata will be registered with DataCite.
 
-If the dataset is draft or private, the DOI will not be registered with DataCite. When the dataset
-is made active & public, the DOI will be submitted.
+If the dataset is draft or private, the DOI will not be registered with DataCite. When the dataset is made active & public, the DOI will be registered.
 This allows datasets to be embargoed, but still provides a DOI to be referenced in publications.
 
-You will need an account with a DataCite DOI service provider to use this extension.
+You will need a DataCite account to use this extension.
 
 ## DOI Metadata
 
-Uses [DataCite Metadata Schema v4.2](https://schema.datacite.org/meta/kernel-4.2/index.html).
+This extension currently uses [DataCite Metadata Schema v4.2](https://schema.datacite.org/meta/kernel-4.2/index.html).
 
-Dataset package fields and CKAN config settings are mapped to the DataCite Schema with default
-values, but these can be overwritten by implementing `IDoi` interface methods.
+Dataset package fields and CKAN config settings are mapped to the DataCite Schema with default values, but these can be overwritten by [implementing `IDoi` interface methods](https://ckanext-doi.readthedocs.io/en/latest/usage/#interfaces).
 
 ### Required fields
 
@@ -48,7 +45,7 @@ values, but these can be overwritten by implementing `IDoi` interface methods.
 | dataset:metadata_created.year | publicationYear |
 | dataset:type                  | resourceType    |
 
-See [`metadata.py`](./ckanext/doi/lib/metadata.py) for full mapping details.
+See [`metadata.py`](https://github.com/NaturalHistoryMuseum/ckanext-doi/blob/main/ckanext/doi/lib/metadata.py) for full mapping details.
 
 <!--overview-end-->
 
@@ -110,18 +107,17 @@ These are the options that can be specified in your .ini config file.
 
 ## DateCite Credentials **[REQUIRED]**
 
-These will be given to you by your DataCite provider.
+DataCite Repository account credentials are used to register DOIs. A Repository account is administered by a DataCite Member.
 
-| Name                           | Description                                                                                |
-|--------------------------------|--------------------------------------------------------------------------------------------|
-| `ckanext.doi.account_name`     | Your datacite account name                                                                 |
-| `ckanext.doi.account_password` | Your datacite account password                                                             |
-| `ckanext.doi.prefix`           | A datacite prefix taken from your account (from your test account if running in test mode) |
+| Name                           | Description                                                                                             | Example    |
+|--------------------------------|---------------------------------------------------------------------------------------------------------|------------|
+| `ckanext.doi.account_name`     | Your DataCite Repository account name                                                                   | `ABC.DEFG` |
+| `ckanext.doi.account_password` | Your DataCite Repository account password                                                               |            |
+| `ckanext.doi.prefix`           | The prefix taken from your DataCite Repository account (from your test account if running in test mode) | `10.1234`  |
 
 ## Institution Name **[REQUIRED]**
 
-You also need to provide the name of the institution publishing the DOIs (e.g. Natural History
-Museum).
+You also need to provide the name of the institution publishing the DOIs (e.g. Natural History Museum).
 
 | Name                    | Description                                    |
 |-------------------------|------------------------------------------------|
@@ -129,17 +125,13 @@ Museum).
 
 ## Test/Debug Mode **[REQUIRED]**
 
-If test mode is set to true, the DOIs will use the DataCite test site. You must also set the prefix
-to one from your test site account.
+If test mode is set to true, the DOIs will use the DataCite test site. The test site uses a separate account, so you must also change your credentials and prefix.
 
 | Name                    | Description          | Options    |
 |-------------------------|----------------------|------------|
 | `ckanext.doi.test_mode` | Enable dev/test mode | True/False |
 
-Note that the DOIs will still display on your web interface as `https://doi.org/YOUR-DOI`, but they
-_will not resolve_. Log in to your test account to view all your minted test DOIs, or
-replace `https://doi.org/` with `https://doi.test.datacite.org/dois/` in a single URL to view a
-specific DOI.
+Note that the DOIs will still display on your web interface as `https://doi.org/YOUR-DOI`, but they _will not resolve_. Log in to your test account to view all your minted test DOIs, or replace `https://doi.org/` with `https://doi.test.datacite.org/dois/` in a single URL to view a specific DOI.
 
 ## Other options
 
@@ -180,11 +172,7 @@ methods.
 2. new parameter: `errors`
 3. new return value: tuple of `metadata_dict`, `errors`
 
-Extracts metadata from a pkg_dict for use in generating datacite DOIs. The base method from this
-extension is run first, then the metadata dict is passed through all the implementations of this
-method. After running these, if any of the required values (see above) are still in the `errors`
-dict (i.e. they still could not be handled by any other extension), a `DOIMetadataException` will be
-thrown.
+Extracts metadata from a pkg_dict for use in generating datacite DOIs. The base method from this extension is run first, then the metadata dict is passed through all the implementations of this method. After running these, if any of the required values (see above) are still in the `errors` dict (i.e. they still could not be handled by any other extension), a `DOIMetadataException` will be thrown.
 
 | Parameter       | Description                                                                                                                                               |
 |-----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -199,9 +187,7 @@ thrown.
 1. previously called `metadata_to_xml`
 2. parameters rearranged (previously `xml_dict`, `metadata`)
 
-Converts the metadata_dict into an xml_dict that can be passed to the datacite library's
-schema42.tostring() and schema42.validate() methods. The base method from this extension is run
-first, then the xml dict is passed through all the implementations of this method.
+Converts the metadata_dict into an xml_dict that can be passed to the `datacite` library's `schema42.tostring()` and `schema42.validate()` methods. The base method from this extension is run first, then the xml dict is passed through all the implementations of this method.
 
 | Parameter       | Description                                                                                            |
 |-----------------|--------------------------------------------------------------------------------------------------------|
@@ -237,9 +223,7 @@ To run the tests can be run against ckan 2.9.x and 2.10.x on Python3:
    ```
 
 2. Then run the tests.
-   The root of the repository is mounted into the ckan container as a volume by the Docker compose
-   configuration, so you should only need to rebuild the ckan image if you change the extension's
-   dependencies.
+   The root of the repository is mounted into the ckan container as a volume by the Docker compose configuration, so you should only need to rebuild the ckan image if you change the extension's dependencies.
    ```shell
    # run tests against ckan 2.9.x
    docker-compose run latest
@@ -248,7 +232,6 @@ To run the tests can be run against ckan 2.9.x and 2.10.x on Python3:
    docker-compose run next
    ```
 
-Note that the tests mock the DataCite API and therefore don't require an internet connection nor
-your DataCite credentials to run.
+Note that the tests mock the DataCite API and therefore don't require an internet connection nor your DataCite credentials to run.
 
 <!--testing-end-->
