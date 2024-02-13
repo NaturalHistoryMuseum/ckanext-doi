@@ -74,6 +74,6 @@ def create_contributor(
                 'nameIdentifierScheme': _id['scheme'],
             }
             if 'scheme_uri' in _id:
-                id_dict['schemeUri'] = _id['scheme_uri']
+                id_dict['schemeURI'] = _id['scheme_uri']
             contributor['nameIdentifiers'].append(id_dict)
     return contributor
