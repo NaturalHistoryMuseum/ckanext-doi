@@ -1,5 +1,11 @@
 # Changelog
 
+## v3.1.12 (2024-02-13)
+
+### Fix
+
+- correct casing for schemeURI property
+
 ## v3.1.11 (2024-01-15)
 
 ### Docs
