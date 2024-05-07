@@ -196,7 +196,7 @@ def build_metadata_dict(pkg_dict):
             license = license_register.get(license_id)
             if license is not None:
                 optional['rightsList'] = [
-                    {'url': license.url, 'identifier': license.id}
+                    {'rightsURI': license.url, 'rightsIdentifier': license.id}
                 ]
     except Exception as e:
         errors['rightsList'] = e
