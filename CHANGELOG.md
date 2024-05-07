@@ -1,5 +1,11 @@
 # Changelog
 
+## v3.1.13 (2024-05-07)
+
+### Fix
+
+- update rightsList fields to match datacite schema
+
 ## v3.1.12 (2024-02-13)
 
 ### Fix
