@@ -141,7 +141,9 @@ def build_metadata_dict(pkg_dict):
     # LANGUAGE
     # use language set in CKAN
     try:
-        optional['language'] = ckan_lang()
+        # remove any localisation of the language, e.g. en from en_GB.
+        # default to english in case nothing is set, because it's ckan's default
+        optional['language'] = (ckan_lang() or 'en')[:2]
     except Exception as e:
         errors['language'] = e
 
