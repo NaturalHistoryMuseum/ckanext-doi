@@ -1,5 +1,11 @@
 # Changelog
 
+## v3.1.14 (2024-06-10)
+
+### Fix
+
+- use first two chars of ckan lang code
+
 ## v3.1.13 (2024-05-07)
 
 ### Fix
