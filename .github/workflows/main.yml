@@ -14,12 +14,12 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Build images
-        run: docker-compose build
+        run: docker compose build
 
       - name: Run tests against latest
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-        run: docker-compose run -e COVERALLS_REPO_TOKEN latest bash /opt/scripts/run-tests.sh -c ckanext.doi
+        run: docker compose run -e COVERALLS_REPO_TOKEN latest bash /opt/scripts/run-tests.sh -c ckanext.doi
 
   test_next:
     name: Run tests against ckantest next
@@ -30,7 +30,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Build images
-        run: docker-compose build
+        run: docker compose build
 
       - name: Run tests against next
-        run: docker-compose run -e COVERALLS_REPO_TOKEN next bash /opt/scripts/run-tests.sh -c ckanext.doi
+        run: docker compose run -e COVERALLS_REPO_TOKEN next bash /opt/scripts/run-tests.sh -c ckanext.doi
