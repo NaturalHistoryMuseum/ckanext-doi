@@ -9,27 +9,29 @@ import string
 import logging
 import random
 import xmltodict
-from ckan.common import asbool
 from ckan.plugins import toolkit
 from ckanext.doi.model.crud import DOIQuery
 from datacite import DataCiteMDSClient, schema42
 from datacite.errors import DataCiteError, DataCiteNotFoundError
 from datetime import datetime as dt
 
-from ckanext.doi.lib.helpers import doi_test_mode
+from crossref.restful import Depositor
+
+from ckanext.doi.lib.helpers import doi_test_mode, get_doi_platform
 
 log = logging.getLogger(__name__)
 
 DEPRECATED_TEST_PREFIX = '10.5072'
 
 
-class DataciteClient:
-    test_url = 'https://mds.test.datacite.org'
+class DOIClient:
+    test_url = None
+    client_name = ""
 
     def __init__(self):
         self.username = toolkit.config.get('ckanext.doi.account_name')
         self.password = toolkit.config.get('ckanext.doi.account_password')
-        self._test_mode = None
+        self._test_mode = False
         self.prefix = self.get_prefix()
         client_config = {
             'username': self.username,
@@ -50,7 +52,7 @@ class DataciteClient:
         Defaults to true.
         :return: test mode enabled as boolean (true=enabled)
         """
-        if self._test_mode is None:
+        if self._test_mode is False:
             self._test_mode = doi_test_mode()
         return self._test_mode
 
@@ -105,6 +107,11 @@ class DataciteClient:
                     )
             attempts -= 1
         raise Exception('Failed to generate a DOI')
+
+
+class DataciteClient(DOIClient):
+    test_url = 'https://mds.test.datacite.org'
+    client_name = "DataCite"
 
     def mint_doi(self, doi, package_id):
         """
@@ -187,3 +194,87 @@ class DataciteClient:
         else:
             # if the original doesn't have any dates, it's definitely different
             return False
+
+
+class CrossrefClient(DOIClient):
+    test_url = 'https://test.crossref.org'
+    client_name = "Crossref"
+
+    def set_metadata(self, doi, xml_dict):
+        """
+        Prepares and send metadata to Crossref to generate DOI.
+
+        :param doi: DOI identifier
+        :param xml_dict: the metadata as an xml dict (generated from build_xml_dict)
+        :return:
+        """
+        self.make_crossref_request(self, doi, xml_dict)
+
+    def make_crossref_request(self, doi, xml_dict):
+        error_msg = None
+        elements = doi.split("/")
+
+        if len(elements) == 2:
+            ds_doi = elements[1]
+            depositor = Depositor(
+                self.get_prefix,
+                self.username,
+                self.password,
+                use_test_server=self._test_mode,
+            )
+
+            # Temporary solution until "register_doi" method is fixed by the library.
+            endpoint = depositor.get_endpoint("deposit")
+            files = {"mdFile": ("%s.xml" % ds_doi, xml_dict)}
+
+            params = {
+                "operation": "doMDUpload",
+                "login_id": self.username,
+                "login_passwd": self.password,
+            }
+
+            request = depositor.do_http_request(
+                "post",
+                endpoint,
+                data=params,
+                files=files,
+                custom_header=depositor.custom_header,
+                timeout=1000,
+            )
+
+            if request.status_code == 200:
+                resp_text = request.text
+
+                if "Not Accessible" in resp_text:
+                    error_msg = 'There is an issue with credentials,' \
+                        ' please re-check them and try again.'
+                elif "<title>FAILURE</title>" in resp_text:
+                    error_msg = 'Response returend with a failure.'
+            else:
+                error_msg = (
+                    f'Request was returned with a {request.status_code} status code.'
+                )
+
+        if error_msg:
+            log.warning(error_msg)
+        else:
+            DOIQuery.update_doi(doi, published=dt.now())
+
+        return error_msg
+
+    def mint_doi(self, doi, package_id):
+        # Crossref doesn't have this step. Passing.
+        pass
+
+    def check_for_update(self, doi, xml_dict):
+        # Will update each Dataset update
+        return False
+
+
+def get_client():
+    platform = get_doi_platform()
+    clients = {
+        "datacite": DataciteClient,
+        "crossref": CrossrefClient,
+    }
+    return clients[platform]()

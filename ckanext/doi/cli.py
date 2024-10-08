@@ -20,21 +20,6 @@ def doi():
     pass
 
 
-@doi.command(name='initdb')
-def init_db():
-    if not model.package_table.exists():
-        click.secho(
-            'Package table must exist before initialising the DOI table', fg='red'
-        )
-        raise click.Abort()
-
-    if doi_model.doi_table.exists():
-        click.secho('DOI table already exists', fg='green')
-    else:
-        doi_model.doi_table.create()
-        click.secho('DOI table created', fg='green')
-
-
 @doi.command(name='delete-dois')
 def delete_dois():
     """

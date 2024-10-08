@@ -66,3 +66,13 @@ def doi_test_mode():
     :return: bool
     """
     return toolkit.asbool(get_setting('ckanext.doi.test_mode', default=get_debug()))
+
+
+def get_doi_platform():
+    """
+    Get name of the Platform that is being used for DOI creation
+
+    :return: string
+    """
+
+    return toolkit.config.get('ckanext.doi.platform', 'datacite')
