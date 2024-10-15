@@ -16,22 +16,23 @@ _A CKAN extension for assigning a digital object identifier (DOI) to datasets, u
 # Overview
 
 <!--overview-start-->
-This extension assigns a digital object identifier (DOI) to datasets, using the DataCite DOI service.
+This extension assigns a digital object identifier (DOI) to datasets, using the DataCite/Crossref DOI service.
 
 When a new dataset is created it is assigned a new DOI. This DOI will be in the format:
 
 `https://doi.org/[prefix]/[8 random alphanumeric characters]`
 
-If the new dataset is active and public, the DOI and metadata will be registered with DataCite.
+If the new dataset is active and public, the DOI and metadata will be registered with DataCite/Crossref.
 
-If the dataset is draft or private, the DOI will not be registered with DataCite. When the dataset is made active & public, the DOI will be registered.
+If the dataset is draft or private, the DOI will not be registered with DataCite/Crossref. When the dataset is made active & public, the DOI will be registered.
 This allows datasets to be embargoed, but still provides a DOI to be referenced in publications.
 
-You will need a DataCite account to use this extension.
+You will need a DataCite/Crossref account to use this extension.
 
 ## DOI Metadata
 
-This extension currently uses [DataCite Metadata Schema v4.2](https://schema.datacite.org/meta/kernel-4.2/index.html).
+DataCite currently uses [DataCite Metadata Schema v4.2](https://schema.datacite.org/meta/kernel-4.2/index.html).
+Crossref currently uses [Crossref Metadata Schema v5.3.1](https://data.crossref.org/reports/help/schema_doc/5.3.1/index.html).
 
 Dataset package fields and CKAN config settings are mapped to the DataCite Schema with default values, but these can be overwritten by [implementing `IDoi` interface methods](https://ckanext-doi.readthedocs.io/en/latest/usage/#interfaces).
 
@@ -46,6 +47,13 @@ Dataset package fields and CKAN config settings are mapped to the DataCite Schem
 | dataset:type                  | resourceType    |
 
 See [`metadata.py`](https://github.com/NaturalHistoryMuseum/ckanext-doi/blob/main/ckanext/doi/lib/metadata.py) for full mapping details.
+
+| CKAN Field                    | Crossref Schema |
+|-------------------------------|-----------------|
+| dataset:title                 | title           |
+| config:ckanext.doi.publisher  | publisher       |
+| config:ckanext.doi.account_name  | email_address       |
+
 
 <!--overview-end-->
 
@@ -93,10 +101,10 @@ Installing from a `pyproject.toml` in editable mode (i.e. `pip install -e`) requ
 
 2. Initialise the database:
    ```shell
-   ckan -c $CONFIG_FILE doi initdb
+   ckan -c $CONFIG_FILE db upgrade -p doi
    ```
 
-3. This extension will only work if you have signed up for an account with [DataCite](https://datacite.org). You will need a development/test account to use this plugin in test mode, and a live account to mint active DOIs.
+3. This extension will only work if you have signed up for an account with [DataCite](https://datacite.org)/[Crossref](https://www.crossref.org). You will need a development/test account to use this plugin in test mode, and a live account to mint active DOIs.
 
 <!--installation-end-->
 
@@ -111,9 +119,9 @@ DataCite Repository account credentials are used to register DOIs. A Repository 
 
 | Name                           | Description                                                                                             | Example    |
 |--------------------------------|---------------------------------------------------------------------------------------------------------|------------|
-| `ckanext.doi.account_name`     | Your DataCite Repository account name                                                                   | `ABC.DEFG` |
-| `ckanext.doi.account_password` | Your DataCite Repository account password                                                               |            |
-| `ckanext.doi.prefix`           | The prefix taken from your DataCite Repository account (from your test account if running in test mode) | `10.1234`  |
+| `ckanext.doi.account_name`     | Your DataCite/Crossref Repository account name                                                                   | `ABC.DEFG` |
+| `ckanext.doi.account_password` | Your DataCite/Crossref Repository account password                                                               |            |
+| `ckanext.doi.prefix`           | The prefix taken from your DataCite/Crossref Repository account (from your test account if running in test mode) | `10.1234`  |
 
 ## Institution Name **[REQUIRED]**
 
@@ -123,15 +131,33 @@ You also need to provide the name of the institution publishing the DOIs (e.g. N
 |-------------------------|------------------------------------------------|
 | `ckanext.doi.publisher` | The name of the institution publishing the DOI |
 
+## Platform Name **[OPTIONAL]**
+
+You also need to provide the name of the platform for publishing the DOIs (e.g. `crossref` or `datacite`). By default it is set to `datacite`.
+
+| Name                    | Description                                    |
+|-------------------------|------------------------------------------------|
+| `ckanext.doi.platform` | The name of the platform for publishing the DOI |
+
+## Disable DOI minting to Dataset update **[OPTIONAL]**
+
+Disable the minting trigger while updating Dataset. Needed for more custom ways of triggering DOI minting process.
+
+| Name                    | Description                                    |
+|-------------------------|------------------------------------------------|
+| `ckanext.doi.disable_on_update` | True/False |
+
 ## Test/Debug Mode **[REQUIRED]**
 
-If test mode is set to true, the DOIs will use the DataCite test site. The test site uses a separate account, so you must also change your credentials and prefix.
+If test mode is set to true, the DOIs will use the DataCite/Crossref test site. The test site uses a separate account, so you must also change your credentials and prefix.
 
 | Name                    | Description          | Options    |
 |-------------------------|----------------------|------------|
 | `ckanext.doi.test_mode` | Enable dev/test mode | True/False |
 
-Note that the DOIs will still display on your web interface as `https://doi.org/YOUR-DOI`, but they _will not resolve_. Log in to your test account to view all your minted test DOIs, or replace `https://doi.org/` with `https://doi.test.datacite.org/dois/` in a single URL to view a specific DOI.
+Note that the DataCite DOIs will still display on your web interface as `https://doi.org/YOUR-DOI`, but they _will not resolve_. Log in to your test account to view all your minted test DOIs, or replace `https://doi.org/` with `https://doi.test.datacite.org/dois/` in a single URL to view a specific DOI.
+
+Crossref TBA
 
 ## Other options
 

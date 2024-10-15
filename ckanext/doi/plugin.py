@@ -6,16 +6,18 @@
 
 from datetime import datetime
 from logging import getLogger
+from typing import Any
 
 from ckan.plugins import SingletonPlugin, implements, interfaces, toolkit
 
 from ckanext.doi import cli
-from ckanext.doi.lib.api import DataciteClient
+from ckanext.doi.lib.api import DataciteClient, get_client
 from ckanext.doi.lib.helpers import (
     get_site_title,
     get_site_url,
     package_get_year,
     doi_test_mode,
+    get_doi_platform,
 )
 from ckanext.doi.lib.metadata import build_metadata_dict, build_xml_dict
 from ckanext.doi.model.crud import DOIQuery
@@ -63,7 +65,8 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
         network.
         """
         # Is this active and public? If so we need to make sure we have an active DOI
-        if pkg_dict.get('state', 'active') == 'active' and not pkg_dict.get(
+        if not toolkit.config.get('ckanext.doi.disable_on_update', False) and pkg_dict.get(
+            'state', 'active') == 'active' and not pkg_dict.get(
             'private', False
         ):
             package_id = pkg_dict['id']
@@ -80,22 +83,22 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
             # after package creation)
             doi = DOIQuery.read_package(package_id, create_if_none=True)
 
-            metadata_dict = build_metadata_dict(pkg_show_dict)
+            metadata_dict: dict[str, Any] = build_metadata_dict(pkg_show_dict)
             xml_dict = build_xml_dict(metadata_dict)
 
-            client = DataciteClient()
+            client = get_client()
 
             if doi.published is None:
                 # metadata gets created before minting
                 client.set_metadata(doi.identifier, xml_dict)
                 client.mint_doi(doi.identifier, package_id)
-                toolkit.h.flash_success('DataCite DOI created')
+                toolkit.h.flash_success(f'{client.client_name} DataCite DOI created')
             else:
                 same = client.check_for_update(doi.identifier, xml_dict)
                 if not same:
                     # Not the same, so we want to update the metadata
                     client.set_metadata(doi.identifier, xml_dict)
-                    toolkit.h.flash_success('DataCite DOI metadata updated')
+                    toolkit.h.flash_success(f'{client.client_name} DOI metadata updated')
 
         return pkg_dict
 
@@ -139,4 +142,5 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
             'now': datetime.now,
             'get_site_title': get_site_title,
             'doi_test_mode': doi_test_mode,
+            'get_doi_platform': get_doi_platform,
         }
