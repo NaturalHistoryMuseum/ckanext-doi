@@ -4,11 +4,11 @@
 # This file is part of ckanext-doi
 # Created by the Natural History Museum in London, UK
 
-import pkg_resources
 import pytest
 from datacite import schema42
 
 from ckanext.doi.lib.metadata import build_metadata_dict, build_xml_dict
+
 from .helpers import constants
 
 

@@ -4,19 +4,18 @@
 # This file is part of ckanext-doi
 # Created by the Natural History Museum in London, UK
 
-import string
-
 import logging
 import random
-import xmltodict
-from ckan.common import asbool
-from ckan.plugins import toolkit
-from ckanext.doi.model.crud import DOIQuery
-from datacite import DataCiteMDSClient, schema42
-from datacite.errors import DataCiteError, DataCiteNotFoundError
+import string
 from datetime import datetime as dt
 
+import xmltodict
+from ckan.plugins import toolkit
+from datacite import DataCiteMDSClient, schema42
+from datacite.errors import DataCiteError, DataCiteNotFoundError
+
 from ckanext.doi.lib.helpers import doi_test_mode
+from ckanext.doi.model.crud import DOIQuery
 
 log = logging.getLogger(__name__)
 
@@ -75,9 +74,9 @@ class DataciteClient:
         """
         Generate a new DOI which isn't currently in use.
 
-        The database is checked for previous
-        usage, as is Datacite itself. Use whatever value is retuned from this function quickly to
-        avoid double use as this function uses no locking.
+        The database is checked for previous usage, as is Datacite itself. Use whatever
+        value is retuned from this function quickly to avoid double use as this function
+        uses no locking.
         :return: the full, unique DOI
         """
         # the list of valid characters is larger than just lowercase and the digits but we don't

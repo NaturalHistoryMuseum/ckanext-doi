@@ -18,15 +18,18 @@ def create_contributor(
     Create a dictionary representation of a contributing entity (either a person or an
     organisation) for use in an xml_dict.
 
-    :param full_name: the full name of the creator, in the format "FamilyName, GivenName";
-    can be omitted if family_name and given_name are provided
-    :param family_name: family name of the creator; will be ignored if given_name is None
+    :param full_name: the full name of the creator, in the format "FamilyName,
+        GivenName"; can be omitted if family_name and given_name are provided
+    :param family_name: family name of the creator; will be ignored if given_name is
+        None
     :param given_name: given name(s) or initials of the creator; will be ignored if
-    family_name is None
+        family_name is None
     :param is_org: sets name type to Organizational if true
     :param contributor_type: the contributor type to set
-    :param affiliations: affiliations of the contributor, either a string or list of strings
-    :param identifiers: a list of dicts with "identifier", "scheme", and (optionally) "scheme_uri"
+    :param affiliations: affiliations of the contributor, either a string or list of
+        strings
+    :param identifiers: a list of dicts with "identifier", "scheme", and (optionally)
+        "scheme_uri"
     :return: a dict
     """
     if is_org and full_name is None:

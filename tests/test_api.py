@@ -5,13 +5,14 @@
 # Created by the Natural History Museum in London, UK
 
 import xml.etree.ElementTree as ET
+from unittest.mock import MagicMock, patch
 
 import pytest
 from datacite.errors import DataCiteError, DataCiteNotFoundError
-from unittest.mock import patch, MagicMock
+
+from ckanext.doi.lib.api import DataciteClient
 
 from .helpers import constants
-from ckanext.doi.lib.api import DataciteClient
 
 
 def first_then(first, then):

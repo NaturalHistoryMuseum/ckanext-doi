@@ -47,8 +47,8 @@ class DOIQuery:
         Retrieve a record associated with a given package.
 
         :param package_id: the id of the package
-        :param create_if_none: generate a new DOI and add a record if no record is found for the
-                               given package
+        :param create_if_none: generate a new DOI and add a record if no record is found
+            for the given package
         :return: the record object
         """
         from ckanext.doi.lib.api import DataciteClient
