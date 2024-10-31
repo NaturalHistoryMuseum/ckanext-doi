@@ -30,7 +30,7 @@ def create_contributor(
         strings
     :param identifiers: a list of dicts with "identifier", "scheme", and (optionally)
         "scheme_uri"
-    :return: a dict
+    :returns: a dict
     """
     if is_org and full_name is None:
         raise ValueError('Creator name must be supplied as full_name="Org Name"')

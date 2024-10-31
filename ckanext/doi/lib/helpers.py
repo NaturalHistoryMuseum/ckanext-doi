@@ -49,7 +49,7 @@ def date_or_none(date_object_or_string):
     Try and convert the given object into a datetime; if not possible, return None.
 
     :param date_object_or_string: a datetime or date string
-    :return: datetime or None
+    :returns: datetime or None
     """
     if isinstance(date_object_or_string, datetime):
         return date_object_or_string
@@ -63,6 +63,6 @@ def doi_test_mode():
     """
     Determines whether we're running in test mode.
 
-    :return: bool
+    :returns: bool
     """
     return toolkit.asbool(get_setting('ckanext.doi.test_mode', default=get_debug()))
