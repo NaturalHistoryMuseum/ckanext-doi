@@ -3,13 +3,13 @@
 #
 # This file is part of ckanext-doi
 # Created by the Natural History Museum in London, UK
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
-from datacite.errors import DataCiteNotFoundError
-
 from ckan.model import Session
 from ckan.tests import factories
+from datacite.errors import DataCiteNotFoundError
+
 from ckanext.doi.model.doi import DOI
 
 
