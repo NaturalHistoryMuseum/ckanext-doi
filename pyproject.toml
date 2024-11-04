@@ -1,6 +1,6 @@
 [project]
 name = "ckanext-doi"
-version = "3.1.16"
+version = "3.1.17"
 description = "A CKAN extension for assigning a digital object identifier (DOI) to datasets, using the DataCite DOI service."
 readme = "README.md"
 requires-python = ">=3.6"
@@ -58,7 +58,7 @@ exclude = ["tests", "docs"]
 
 [tool.commitizen]
 name = "cz_nhm"
-version = "3.1.16"
+version = "3.1.17"
 tag_format = "v$version"
 update_changelog_on_bump = true
 changelog_incremental = true

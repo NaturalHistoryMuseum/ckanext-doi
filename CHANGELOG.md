@@ -1,5 +1,12 @@
 # Changelog
 
+## v3.1.17 (2024-11-04)
+
+### Docs
+
+- use variable logo based on colour scheme
+- fix tests badge tests workflow file was renamed
+
 ## v3.1.16 (2024-11-04)
 
 ### Docs
