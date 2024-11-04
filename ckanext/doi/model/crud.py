@@ -22,7 +22,7 @@ class DOIQuery:
         :param identifier: a new DOI string
         :param package_id: the id of the package this DOI represents
         :param published: when this DOI was published (datetime, nullable)
-        :return: the newly created record object
+        :returns: the newly created record object
         """
         new_record = DOI(
             identifier=identifier, package_id=package_id, published=published
@@ -37,7 +37,7 @@ class DOIQuery:
         Retrieve a record with a given DOI.
 
         :param identifier: the DOI string
-        :return: the record object
+        :returns: the record object
         """
         return Session.query(DOI).get(identifier)
 
@@ -47,9 +47,9 @@ class DOIQuery:
         Retrieve a record associated with a given package.
 
         :param package_id: the id of the package
-        :param create_if_none: generate a new DOI and add a record if no record is found for the
-                               given package
-        :return: the record object
+        :param create_if_none: generate a new DOI and add a record if no record is found
+            for the given package
+        :returns: the record object
         """
         from ckanext.doi.lib.api import DataciteClient
 
@@ -67,7 +67,7 @@ class DOIQuery:
 
         :param identifier: the DOI string
         :param kwargs: the values to be updated
-        :return: the updated record object
+        :returns: the updated record object
         """
         update_dict = {k: v for k, v in kwargs.items() if k in cls.cols}
         Session.query(DOI).filter(DOI.identifier == identifier).update(update_dict)
@@ -82,7 +82,7 @@ class DOIQuery:
 
         :param package_id: the id of the package
         :param kwargs: the values to be updated
-        :return: the updated record object
+        :returns: the updated record object
         """
         update_dict = {k: v for k, v in kwargs.items() if k in cls.cols}
         Session.query(DOI).filter(DOI.package_id == package_id).update(update_dict)
@@ -95,7 +95,7 @@ class DOIQuery:
         Delete the record with a given DOI.
 
         :param identifier: the DOI string
-        :return: True if a record was deleted, False if not
+        :returns: True if a record was deleted, False if not
         """
         to_delete = cls.read_doi(identifier)
         if to_delete is not None:
@@ -111,7 +111,7 @@ class DOIQuery:
         Delete the record associated with a given package.
 
         :param package_id: the id of the package
-        :return: True if a record was deleted, False if not
+        :returns: True if a record was deleted, False if not
         """
         to_delete = cls.read_package(package_id)
         if to_delete is not None:
