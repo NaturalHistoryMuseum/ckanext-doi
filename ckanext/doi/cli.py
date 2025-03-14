@@ -1,12 +1,10 @@
 import click
-from ckan import model
 from ckan.model import Session
 from ckan.plugins import toolkit
 from datacite.errors import DataCiteError
 
 from ckanext.doi.lib.api import DataciteClient
 from ckanext.doi.lib.metadata import build_metadata_dict, build_xml_dict
-from ckanext.doi.model import doi as doi_model
 from ckanext.doi.model.crud import DOIQuery
 from ckanext.doi.model.doi import DOI
 
@@ -18,21 +16,6 @@ def get_commands():
 @click.group()
 def doi():
     pass
-
-
-@doi.command(name='initdb')
-def init_db():
-    if not model.package_table.exists():
-        click.secho(
-            'Package table must exist before initialising the DOI table', fg='red'
-        )
-        raise click.Abort()
-
-    if doi_model.doi_table.exists():
-        click.secho('DOI table already exists', fg='green')
-    else:
-        doi_model.doi_table.create()
-        click.secho('DOI table created', fg='green')
 
 
 @doi.command(name='delete-dois')
