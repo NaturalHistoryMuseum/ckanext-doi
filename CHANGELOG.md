@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.0.0 (2025-03-17)
+
+### Breaking Changes
+
+- switch to alembic migration scripts
+
 ## v3.1.17 (2024-11-04)
 
 ### Docs
