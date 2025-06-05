@@ -22,7 +22,7 @@ dependencies = [
     "jsonschema==3.0.0",
     "xmltodict==0.12.0",
     "datacite==1.1.2",
-    "ckantools>=0.4.1"
+    "ckantools>=0.4.2"
 ]
 
 [project.optional-dependencies]
