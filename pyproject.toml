@@ -19,6 +19,7 @@ classifiers = [
     "Programming Language :: Python :: 3.8"
 ]
 dependencies = [
+    "importlib-resources",
     "jsonschema==3.0.0",
     "xmltodict==0.12.0",
     "datacite==1.1.2",
@@ -54,6 +55,7 @@ zip-safe = false
 exclude = ["tests", "docs"]
 
 [tool.setuptools.package-data]
+"ckanext.doi.data" = ["*", "**/*"]
 "ckanext.doi.theme" = ["*", "**/*"]
 
 [tool.commitizen]
@@ -70,9 +72,14 @@ version_files = [
 [tool.ruff.format]
 quote-style = "single"
 
-[tool.pylint]
-max-line-length = 88
-disable = ["C0114", "R0903"]
+[tool.ruff.lint]
+ignore = [
+    "D100",
+    "D200",
+    "D202",
+    "D203",
+    "D212"
+]
 
 [tool.docformatter]
 wrap-summaries = 88
