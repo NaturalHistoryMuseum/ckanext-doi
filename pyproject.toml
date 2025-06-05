@@ -73,6 +73,12 @@ version_files = [
 quote-style = "single"
 
 [tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "I",
+    "D"
+]
 ignore = [
     "D100",
     "D200",
