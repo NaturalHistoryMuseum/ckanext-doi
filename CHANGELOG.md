@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.0.2 (2025-06-09)
+
+### Fix
+
+- remove auto-added pyproject fields
+
 ## v4.0.1 (2025-06-09)
 
 ### Build System(s)
