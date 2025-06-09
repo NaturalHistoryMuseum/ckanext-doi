@@ -1,5 +1,18 @@
 # Changelog
 
+## v4.0.1 (2025-06-09)
+
+### Build System(s)
+
+- add ruff lint select rules
+- remove pylint, add ruff lint ignore rules
+- update ckantools
+
+### CI System(s)
+
+- set ruff target py version, add more ignores - avoid using fixes that don't work for python 3.8 (our current version) - ignore recommended ruff formatter conflicts - ignore more docstring rules
+- update pre-commit repo versions
+
 ## v4.0.0 (2025-03-17)
 
 ### Breaking Changes
