@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.0.3 (2025-08-11)
+
+### Build System(s)
+
+- include db migration files
+
 ## v4.0.2 (2025-06-09)
 
 ### Fix
