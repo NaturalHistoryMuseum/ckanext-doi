@@ -55,6 +55,7 @@ exclude = ["tests", "docs"]
 
 [tool.setuptools.package-data]
 "ckanext.doi.theme" = ["*", "**/*"]
+"ckanext.doi.migration" = ["*", "**/*"]
 
 [tool.commitizen]
 name = "cz_nhm"
