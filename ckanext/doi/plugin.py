@@ -89,13 +89,19 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
                 # metadata gets created before minting
                 client.set_metadata(doi.identifier, xml_dict)
                 client.mint_doi(doi.identifier, package_id)
-                toolkit.h.flash_success('DataCite DOI created')
+                if toolkit.g and hasattr(toolkit.g, 'blueprint') and hasattr(toolkit.g, 'view'):
+                    # Only flash success if the request has come from a blueprint view
+                    # CKAN background jobs will throw an exception
+                    toolkit.h.flash_success('DataCite DOI created')
             else:
                 same = client.check_for_update(doi.identifier, xml_dict)
                 if not same:
                     # Not the same, so we want to update the metadata
                     client.set_metadata(doi.identifier, xml_dict)
-                    toolkit.h.flash_success('DataCite DOI metadata updated')
+                    if toolkit.g and hasattr(toolkit.g, 'blueprint') and hasattr(toolkit.g, 'view'):
+                        # Only flash success if the request has come from a blueprint view
+                        # CKAN background jobs will throw an exception
+                        toolkit.h.flash_success('DataCite DOI metadata updated')
 
         return pkg_dict
 
