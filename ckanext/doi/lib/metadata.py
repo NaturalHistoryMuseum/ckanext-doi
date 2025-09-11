@@ -5,6 +5,10 @@
 # Created by the Natural History Museum in London, UK
 
 import logging
+import uuid
+from datetime import datetime
+from typing import Any
+from xml.etree.ElementTree import Element,tostring
 
 from ckan.lib.helpers import lang as ckan_lang
 from ckan.model import Package
@@ -13,12 +17,28 @@ from ckan.plugins import PluginImplementations, toolkit
 from ckanext.doi.interfaces import IDoi
 from ckanext.doi.lib import xml_utils
 from ckanext.doi.lib.errors import DOIMetadataException
-from ckanext.doi.lib.helpers import date_or_none, get_site_url, package_get_year
+from ckanext.doi.lib.helpers import (
+    date_or_none,
+    get_site_url,
+    package_get_year,
+    get_doi_platform
+    )
 
 log = logging.getLogger(__name__)
 
 
 def build_metadata_dict(pkg_dict):
+    platform = get_doi_platform()
+
+    metadata_func = {
+        'datacite': datacite_build_medatata_dict,
+        'crossref': crossref_build_medatata_dict,
+    }
+
+    return metadata_func[platform](pkg_dict)
+
+
+def datacite_build_medatata_dict(pkg_dict):
     """
     Build/extract a basic dict of metadata that can then be passed to build_xml_dict.
 
@@ -254,6 +274,17 @@ def build_metadata_dict(pkg_dict):
 
 
 def build_xml_dict(metadata_dict):
+    platform = get_doi_platform()
+
+    xml_func = {
+        'datacite': datacite_build_xml_dict,
+        'crossref': crossref_build_xml_dict,
+    }
+
+    return xml_func[platform](metadata_dict)
+
+
+def datacite_build_xml_dict(metadata_dict):
     """
     Builds a dictionary that can be passed directly to datacite.schema42.tostring() to
     generate xml. Previously named metadata_to_xml but renamed as it's not actually
@@ -324,3 +355,95 @@ def build_xml_dict(metadata_dict):
         xml_dict = plugin.build_xml_dict(metadata_dict, xml_dict)
 
     return xml_dict
+
+
+def crossref_build_medatata_dict(pkg_dict):
+    metadata_dict: dict[str, Any] = {
+        "attrs": [
+            {"version": "5.3.1"},
+            {"xmlns": "http://www.crossref.org/schema/5.3.1"},
+            {"xmlns:jats": "http://www.ncbi.nlm.nih.gov/JATS1"}
+        ],
+        "head" : {
+            "doi_batch_id": str(uuid.uuid4()),
+            "timestamp": round(datetime.utcnow().timestamp()),
+            "depositor": {
+                "depositor_name": toolkit.config.get("ckanext.doi.publisher", ""),
+                "email_address": toolkit.config.get("ckanext.doi.account_name", ""),
+            },
+            "registrant": toolkit.config.get("ckanext.doi.account_name", ""),
+        },
+        "body": {
+            "database": {
+                "database_metadata": {
+                    "attrs": [
+                        {"language": "en"},
+                    ],
+                    "titles": {
+                        "title": "Dataset",
+                    },
+                    "institution": {
+                        "institution_name": toolkit.config.get("ckanext.doi.publisher", "")
+                    },
+                },
+                "dataset": {
+                    "contributors": {
+                        "organization": {
+                            "attrs": [
+                                {"sequence": "first"},
+                                {"contributor_role": "author"}
+                            ],
+                            'item_value': pkg_dict.get("organization", {}).get("title", "")
+                        },
+                    },
+                    "titles": {
+                        "title": pkg_dict['title'],
+                    },
+                    "doi_data": {
+                        "doi": pkg_dict.get("doi", ""),
+                        "resource": f"{get_site_url()}/dataset/{pkg_dict['id']}"
+                    },
+                }
+            }
+        }
+    }
+
+    for plugin in PluginImplementations(IDoi):
+        metadata_dict, errors = plugin.build_metadata_dict(
+            pkg_dict, metadata_dict, errors
+        )
+
+    return metadata_dict
+
+
+def crossref_build_xml_dict(metadata_dict):
+    def _dict_to_xml(tag, data):
+        elem: Element = Element(tag)
+
+        if isinstance(data, dict):
+            if data.get('attrs'):
+                attrs = data.pop('attrs')
+                for attr in attrs:
+                    for attr_name, attr_value in attr.items():
+                        elem.set(attr_name, attr_value)
+
+            if len(data) == 1 and data.get('item_value'):
+                elem.text = str(data.get('item_value'))
+            else:
+                for key, value in data.items():
+                    if isinstance(value, dict):
+                        child_elem: Element = _dict_to_xml(key, value)
+
+                        elem.append(child_elem)
+                    else:
+                        child_elem: Element = Element(key)
+                        child_elem.text = str(value)
+                        elem.append(child_elem)
+        else:
+            elem.text = str(data)
+
+        return elem
+
+    e= _dict_to_xml('doi_batch', metadata_dict)
+
+    return str(tostring(e, encoding='utf8', method='xml').decode('utf8'))

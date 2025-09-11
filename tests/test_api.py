@@ -239,7 +239,7 @@ class TestDataciteClientCreation(object):
     @pytest.mark.ckan_config('ckanext.doi.test_mode', False)
     def test_basics(self, mock_client):
         DataciteClient()
-        assert mock_client.called_once_with(
+        mock_client.assert_called_once_with(
             username='goat!', password='hammocks?', prefix='testing', test_mode=False
         )
         assert 'url' not in mock_client.call_args.kwargs
@@ -247,7 +247,7 @@ class TestDataciteClientCreation(object):
     @pytest.mark.ckan_config('ckanext.doi.test_mode', True)
     def test_test_mode_true(self, mock_client):
         DataciteClient()
-        assert mock_client.called_once_with(
+        mock_client.assert_called_once_with(
             username='goat!',
             password='hammocks?',
             prefix='testing',
