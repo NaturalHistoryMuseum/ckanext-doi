@@ -14,8 +14,9 @@ class IDoi(interfaces.Interface):
 
     def build_metadata_dict(self, pkg_dict, metadata_dict, errors):
         """
-        Extracts metadata from a pkg_dict for use in generating datacite DOIs. Extends
-        the build_metadata_dict method from ckanext-doi.
+        Extracts metadata from a pkg_dict for use in generating datacite DOIs.
+
+        Extends the build_metadata_dict method from ckanext-doi.
 
         :param pkg_dict: package dictionary
         :param metadata_dict: the current metadata dict, created by the ckanext-doi

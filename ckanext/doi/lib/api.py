@@ -107,12 +107,12 @@ class DataciteClient:
 
     def mint_doi(self, doi, package_id):
         """
-        Mints the given DOI on datacite. Does not add metadata, just creates the DOI.
+        Mints the given DOI on datacite.
 
+        Does not add metadata, just creates the DOI.
         :param doi: the doi (full, prefix and suffix)
         :param package_id: the id of the package this doi is for
         """
-
         # create the URL the DOI will point to, i.e. the package page
         site = toolkit.config.get('ckan.site_url')
         if site[-1] != '/':
