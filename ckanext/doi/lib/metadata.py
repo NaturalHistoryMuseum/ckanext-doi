@@ -263,7 +263,6 @@ def build_xml_dict(metadata_dict):
     :param metadata_dict: a dict of metadata generated from build_metadata_dict
     :returns: dict that can be passed directly to datacite.schema42.tostring()
     """
-
     # required fields first (DOI will be added later)
     xml_dict = {
         'creators': [],
