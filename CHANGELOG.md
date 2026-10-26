@@ -1,5 +1,21 @@
 # Changelog
 
+## v4.0.5 (2026-10-26)
+
+### Refactor
+
+- run pre-commit and refactor all files
+
+### CI System(s)
+
+- update pre-commit config
+- restore doi specific tests with updated actions
+- update action versions update the actions to the latest versions
+
+### Chores/Misc
+
+- update team names
+
 ## v4.0.4 (2025-09-22)
 
 ### Fix
