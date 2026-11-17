@@ -7,7 +7,10 @@
 from datetime import datetime
 from logging import getLogger
 
+from ckan import model
 from ckan.plugins import SingletonPlugin, implements, interfaces, toolkit
+from ckan.plugins.interfaces import IMiddleware
+from flask import request
 
 from ckanext.doi import cli
 from ckanext.doi.lib.api import DataciteClient
@@ -32,6 +35,7 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
     implements(interfaces.IPackageController, inherit=True)
     implements(interfaces.ITemplateHelpers, inherit=True)
     implements(interfaces.IClick)
+    implements(IMiddleware, inherit=True)
 
     ## IClick
     def get_commands(self):
@@ -150,3 +154,39 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
             'get_site_title': get_site_title,
             'doi_test_mode': doi_test_mode,
         }
+
+    # IMiddleware
+    def make_middleware(self, app, config):
+        # Handle 404 errors for when a dataset has been deleted
+        @app.errorhandler(404)
+        def handle_404(e):
+            # Check if the request is for a dataset or resource read
+            if (
+                request.endpoint == 'dataset.read'
+                or request.endpoint == 'dataset_resource.read'
+            ):
+                # Get the package from the request view args
+                pkg = model.Package.get((request.view_args or {}).get('id'))
+                # Check if the package exists
+                if pkg:
+                    # Check if the package is deleted, and not private
+                    if pkg.state == 'deleted' and not pkg.private:
+                        # Set the package vars
+                        pkg_dict = toolkit.get_action('package_show')(
+                            {'ignore_auth': True}, {'id': pkg.id}
+                        )
+                        toolkit.c.pkg_dict = pkg_dict
+                        toolkit.c.pkg = model.Package.get(pkg_dict['id'])
+                        # Render the tombstone page
+                        return toolkit.render(
+                            'package/deleted.html',
+                            extra_vars={'pkg_dict': pkg_dict, 'pkg': pkg_dict},
+                        )
+                else:
+                    # Render the error page
+                    return toolkit.render(
+                        'package/no_package.html', extra_vars={'pkg_dict': {}}
+                    )
+            return e
+
+        return app
