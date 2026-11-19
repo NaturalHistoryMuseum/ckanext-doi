@@ -186,7 +186,7 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
                     # Render the error page
                     return toolkit.render(
                         'package/no_package.html', extra_vars={'pkg_dict': {}}
-                    )
+                    ), 404
             return e
 
         return app
