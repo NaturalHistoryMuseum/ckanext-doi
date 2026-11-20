@@ -1,0 +1,22 @@
+{% extends "package/base.html" %}
+
+{# Block the flash message saying the dataset cannot be found #}
+{% block flash %}
+  {% set flash_messages = h.flash.pop_messages() %}
+{% endblock %}
+
+{% block primary %}
+    {% block primary_content %}
+      <h1>{{ pkg_dict.title or pkg_dict.name }}  [Deleted]</h1>
+      <p>This dataset has been deleted and is no longer available.</p>
+
+      {% if pkg_dict.doi %}
+          {% snippet "doi/snippets/package_citation.html", pkg_dict=pkg_dict %}
+      {% endif %}
+
+      {% block package_additional_info %}
+        {% snippet "package/snippets/additional_info.html", pkg_dict=pkg_dict %}
+      {% endblock %}
+
+    {% endblock %}
+{% endblock %}
