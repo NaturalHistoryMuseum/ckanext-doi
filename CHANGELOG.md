@@ -1,5 +1,12 @@
 # Changelog
 
+## v4.0.6 (2026-11-23)
+
+### Fix
+
+- readd 404 response when no package is found
+- adds tombstone page for deleted packages and error message for unknown datasets
+
 ## v4.0.5 (2026-10-26)
 
 ### Refactor
