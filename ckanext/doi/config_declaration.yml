@@ -1,0 +1,27 @@
+# schema version of the config declaration. At the moment, the only valid value is `1`
+version: 1
+
+# an array of configuration blocks. Each block has an "annotation", that
+# describes the block, and the list of options. These groups help to separate
+# config options visually, but they have no extra meaning.
+groups:
+
+# short text that describes the group. It can be shown in the config file
+# as following:
+#   ## MyExt settings ##################
+#   some.option = some.value
+#   another.option = another.value
+- annotation: ExtDoi settings
+
+  # an array of actual declarations
+  options:
+    # The only required item in the declaration is `key`
+
+    - key: ckanext.doi.account_name
+    - key: ckanext.doi.account_password
+    - key: ckanext.doi.prefix
+    - key: ckanext.doi.test_mode
+
+    - key: ckanext.doi.publisher
+    - key: ckanext.doi.site_url
+    - key: ckanext.doi.site_title
