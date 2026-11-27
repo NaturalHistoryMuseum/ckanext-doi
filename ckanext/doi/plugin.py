@@ -26,6 +26,7 @@ from ckanext.doi.model.crud import DOIQuery
 log = getLogger(__name__)
 
 
+@toolkit.blanket.config_declarations
 class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
     """
     CKAN DOI Extension.
