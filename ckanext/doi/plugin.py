@@ -167,10 +167,10 @@ class DOIPlugin(SingletonPlugin, toolkit.DefaultDatasetForm):
             ):
                 # Get the package from the request view args
                 pkg = model.Package.get((request.view_args or {}).get('id'))
-                # Check if the package exists
-                if pkg:
-                    # Check if the package is deleted, and not private
-                    if pkg.state == 'deleted' and not pkg.private:
+                # Check if the package exists and is not private
+                if pkg and not pkg.private:
+                    # Check if the package is deleted
+                    if pkg.state == 'deleted':
                         # Set the package vars
                         pkg_dict = toolkit.get_action('package_show')(
                             {'ignore_auth': True}, {'id': pkg.id}
